@@ -814,17 +814,19 @@
     // FIREBASE CONFIGURATION
     // ============================================
     // PASTE YOUR FIREBASE CONFIG HERE (from Firebase Console Step 5)
-    const firebaseConfig = {
-        apiKey: "AIzaSyCRcR_avSGTnn4G69FUk8wcshrVHZNrj5o",
-        authDomain: "calorie-app-67270.firebaseapp.com",
-        projectId: "calorie-app-67270",
-        storageBucket: "calorie-app-67270.firebasestorage.app",
-        messagingSenderId: "768480441035",
-        appId: "1:768480441035:web:ed34093e220ace6c13614e"
-    };
+   const firebaseConfig = {
+  apiKey: "AIzaSyCRcR_avSGTnn4G69FUk8wcshrVHZNrj5o",
+  authDomain: "calorie-app-67270.firebaseapp.com",
+  projectId: "calorie-app-67270",
+  storageBucket: "calorie-app-67270.firebasestorage.app",
+  messagingSenderId: "768480441035",
+  appId: "1:768480441035:web:ed34093e220ace6c13614e"
+};
 
-    // Initialize Firebase
-    let app, auth, db, currentUser;
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+
+
 
     try {
         app = firebase.initializeApp(firebaseConfig);
@@ -1720,3 +1722,4 @@
 
 </body>
 </html>
+
