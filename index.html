@@ -1,0 +1,1307 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="CalTracker">
+    <title>Calorie Tracker Pro</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 10px;
+            min-height: 100vh;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            max-width: 900px;
+            margin: 0 auto;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #667eea;
+            text-align: center;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+            font-size: 24px;
+        }
+        .section {
+            margin: 15px 0;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            border-left: 5px solid #667eea;
+        }
+        .section h2 {
+            color: #667eea;
+            margin: 0 0 15px 0;
+            font-size: 18px;
+        }
+        .row {
+            margin: 12px 0;
+        }
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        select, input[type="text"], input[type="number"], input[type="date"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            -webkit-appearance: none;
+        }
+        select {
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="6"><path d="M0 0l6 6 6-6z" fill="%23333"/></svg>');
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            padding-right: 30px;
+        }
+        button {
+            width: 100%;
+            padding: 15px;
+            margin: 5px 0;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            touch-action: manipulation;
+        }
+        .btn-add { background-color: #28a745; color: white; }
+        .btn-add:active { background-color: #218838; }
+        .btn-clear { background-color: #dc3545; color: white; }
+        .btn-clear:active { background-color: #c82333; }
+        .btn-save { background-color: #17a2b8; color: white; }
+        .btn-save:active { background-color: #138496; }
+        .btn-nav {
+            background-color: #667eea;
+            color: white;
+            padding: 12px;
+            flex: 1;
+        }
+        .btn-nav:active { background-color: #5568d3; }
+        .total-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            text-align: center;
+            border-radius: 15px;
+            margin: 15px 0;
+        }
+        .total-box h2 { margin: 0; color: white; font-size: 18px; }
+        .total-box .big { font-size: 48px; font-weight: bold; margin: 10px 0; }
+        .date-nav {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+        .date-display {
+            font-size: 16px;
+            font-weight: bold;
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .date-buttons {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        .food-list {
+            background-color: white;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            padding: 10px;
+            max-height: 400px;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .meal-section {
+            margin: 10px 0;
+        }
+        .meal-header {
+            background-color: #667eea;
+            color: white;
+            padding: 12px;
+            border-radius: 8px 8px 0 0;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+        }
+        .meal-header.breakfast { background-color: #ff9800; }
+        .meal-header.lunch { background-color: #4caf50; }
+        .meal-header.dinner { background-color: #2196f3; }
+        .meal-header.snack { background-color: #9c27b0; }
+        .food-row {
+            padding: 12px;
+            background-color: #f8f9fa;
+            border-left: 4px solid #667eea;
+            border-bottom: 1px solid #ddd;
+        }
+        .food-row:last-child {
+            border-radius: 0 0 8px 8px;
+        }
+        .food-name {
+            font-weight: bold;
+            font-size: 14px;
+            display: block;
+            margin-bottom: 5px;
+        }
+        .food-time {
+            color: #999;
+            font-size: 12px;
+            margin-right: 10px;
+        }
+        .food-cal {
+            color: #667eea;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .food-actions {
+            margin-top: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .btn-del {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+        .tab-buttons {
+            display: flex;
+            gap: 5px;
+            margin: 15px 0;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .tab-btn {
+            padding: 12px 20px;
+            border: 2px solid #667eea;
+            background-color: white;
+            color: #667eea;
+            font-weight: bold;
+            border-radius: 8px;
+            white-space: nowrap;
+            flex-shrink: 0;
+            font-size: 14px;
+        }
+        .tab-btn.active {
+            background-color: #667eea;
+            color: white;
+        }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .stat-box {
+            background: white;
+            padding: 15px;
+            text-align: center;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+        }
+        .stat-label { font-size: 11px; color: #666; margin-bottom: 5px; }
+        .stat-value { font-size: 22px; font-weight: bold; color: #667eea; }
+        .warning-box {
+            background-color: #f8d7da;
+            border-left: 4px solid #dc3545;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 10px 0;
+            color: #721c24;
+            font-size: 14px;
+        }
+        .success-box {
+            background-color: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 10px 0;
+            color: #155724;
+            font-size: 14px;
+        }
+        .alert-box {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 10px 0;
+            color: #856404;
+            font-size: 14px;
+        }
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        .history-table th {
+            background-color: #667eea;
+            color: white;
+            padding: 10px 5px;
+            font-size: 12px;
+        }
+        .history-table td {
+            padding: 10px 5px;
+            border-bottom: 1px solid #ddd;
+        }
+        .history-table tr:active {
+            background-color: #e9ecef;
+        }
+        .trend-up { color: #dc3545; font-weight: bold; }
+        .trend-down { color: #28a745; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Calorie Tracker Pro</h1>
+
+    <div class="date-nav">
+        <div class="date-display" id="currentDate">Today</div>
+        <div class="date-buttons">
+            <button class="btn-nav" onclick="changeDate(-1)">◄ Prev</button>
+            <button class="btn-nav" onclick="goToToday()">Today</button>
+            <button class="btn-nav" onclick="changeDate(1)">Next ►</button>
+        </div>
+        <input type="date" id="datePickerInput" onchange="jumpToDate()">
+    </div>
+
+    <div id="healthCoach" style="display:none;"></div>
+
+    <div class="total-box">
+        <h2 id="dateTitle">Today's Total</h2>
+        <div class="big" id="totalCal">0</div>
+        <div id="goalText">No goal set</div>
+    </div>
+
+    <div class="tab-buttons">
+        <button class="tab-btn active" onclick="showTab(1)">Food</button>
+        <button class="tab-btn" onclick="showTab(2)">Weight</button>
+        <button class="tab-btn" onclick="showTab(3)">History</button>
+        <button class="tab-btn" onclick="showTab(4)">Profile</button>
+    </div>
+
+    <!-- TAB 1: FOOD -->
+    <div id="tab1" class="tab-content active">
+        <div class="section" style="background-color: #fff3cd; border-left-color: #ffc107;">
+            <h2 style="color: #856404;">Dietary Mode</h2>
+            <div class="row">
+                <label style="color: #856404;">Select Your Diet:</label>
+                <select id="dietMode" onchange="changeDietMode()">
+                    <option value="none">None - Show All</option>
+                    <option value="halal">Halal / Kosher</option>
+                    <option value="diabetic">Diabetic-Friendly</option>
+                    <option value="vegan">Vegan</option>
+                    <option value="vegetarian">Vegetarian</option>
+                    <option value="keto">Keto / Low-Carb</option>
+                    <option value="glutenFree">Gluten-Free</option>
+                    <option value="lactoseFree">Lactose-Free</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Add Food</h2>
+
+            <div class="row">
+                <label>Select Food:</label>
+                <select id="foodSel" onchange="previewCal()">
+                    <option value="">-- Select --</option>
+                    <optgroup label="Breakfast">
+                        <option value="78" class="animal-product">Boiled Egg</option>
+                        <option value="90" class="animal-product">Fried Egg</option>
+                        <option value="55" class="animal-product">Egg White Only</option>
+                        <option value="79" class="high-carb has-gluten">White Toast</option>
+                        <option value="69" class="high-carb has-gluten">Wheat Toast</option>
+                        <option value="102" class="animal-product has-dairy">Butter</option>
+                        <option value="43" class="non-halal animal-product meat-product">Bacon</option>
+                        <option value="150" class="high-carb has-gluten">Oatmeal</option>
+                    </optgroup>
+                    <optgroup label="Dairy">
+                        <option value="36" class="animal-product has-dairy">Cottage Cheese 50g</option>
+                        <option value="59" class="animal-product has-dairy">Plain Yogurt</option>
+                        <option value="97" class="animal-product has-dairy">Greek Yogurt</option>
+                        <option value="113" class="animal-product has-dairy">Cheddar Cheese</option>
+                    </optgroup>
+                    <optgroup label="Drinks">
+                        <option value="2">Black Coffee</option>
+                        <option value="38" class="animal-product has-dairy">Coffee with Milk</option>
+                        <option value="0">Water</option>
+                        <option value="149" class="animal-product has-dairy high-carb">Whole Milk</option>
+                    </optgroup>
+                    <optgroup label="Diet Drinks">
+                        <option value="0">Coke Zero</option>
+                        <option value="0">Pepsi Max</option>
+                        <option value="0">Sprite Zero</option>
+                    </optgroup>
+                    <optgroup label="Sodas">
+                        <option value="140" class="high-sugar high-carb">Coca-Cola</option>
+                        <option value="150" class="high-sugar high-carb">Pepsi</option>
+                        <option value="112" class="high-sugar high-carb">Orange Juice</option>
+                    </optgroup>
+                    <optgroup label="Beer" id="grpBeer">
+                        <option value="153">Regular Beer</option>
+                        <option value="103">Light Beer</option>
+                        <option value="148">Castle Lager</option>
+                    </optgroup>
+                    <optgroup label="Wine" id="grpWine">
+                        <option value="125">Red Wine</option>
+                        <option value="121">White Wine</option>
+                    </optgroup>
+                    <optgroup label="Spirits" id="grpSpirits">
+                        <option value="97">Vodka</option>
+                        <option value="97">Gin</option>
+                        <option value="97">Brandy</option>
+                        <option value="97">Whiskey</option>
+                    </optgroup>
+                    <optgroup label="Protein">
+                        <option value="165" class="animal-product meat-product">Chicken Breast</option>
+                        <option value="271" class="animal-product meat-product">Beef Steak</option>
+                        <option value="231" class="non-halal animal-product meat-product">Pork Chop</option>
+                        <option value="206" class="animal-product meat-product">Grilled Fish</option>
+                        <option value="200" class="animal-product meat-product">Biltong</option>
+                    </optgroup>
+                    <optgroup label="Plant Protein">
+                        <option value="143">Tofu</option>
+                        <option value="165">Lentils</option>
+                        <option value="227">Chickpeas</option>
+                        <option value="200">Mixed Nuts</option>
+                    </optgroup>
+                    <optgroup label="Starches">
+                        <option value="206" class="high-carb">White Rice</option>
+                        <option value="218" class="high-carb">Brown Rice</option>
+                        <option value="221" class="high-carb has-gluten">Pasta</option>
+                        <option value="180" class="high-carb">Pap</option>
+                        <option value="161" class="high-carb">Baked Potato</option>
+                        <option value="79" class="high-carb has-gluten">Bread Slice</option>
+                    </optgroup>
+                    <optgroup label="Vegetables">
+                        <option value="55">Broccoli</option>
+                        <option value="32">Tomato</option>
+                        <option value="5">Lettuce</option>
+                        <option value="7">Spinach</option>
+                        <option value="120">Avocado 1/2</option>
+                    </optgroup>
+                    <optgroup label="Fruits">
+                        <option value="95" class="high-carb">Apple</option>
+                        <option value="105" class="high-carb">Banana</option>
+                        <option value="62" class="high-carb">Orange</option>
+                    </optgroup>
+                    <optgroup label="Pizza">
+                        <option value="250" class="high-carb has-gluten has-dairy">Margherita Pizza</option>
+                        <option value="300" class="high-carb has-gluten has-dairy">Cheese Pizza</option>
+                        <option value="350" class="high-carb has-gluten has-dairy meat-product">Pepperoni Pizza</option>
+                        <option value="380" class="high-carb has-gluten has-dairy meat-product">Meaty Pizza</option>
+                    </optgroup>
+                    <optgroup label="Protein Shakes">
+                        <option value="120" class="animal-product has-dairy">Whey Protein</option>
+                        <option value="110">Plant Protein</option>
+                        <option value="200" class="animal-product has-dairy">Whey + Milk</option>
+                        <option value="300" class="high-carb animal-product has-dairy">Mass Gainer</option>
+                    </optgroup>
+                    <optgroup label="McDonald's">
+                        <option value="563" class="high-carb has-gluten meat-product">Big Mac</option>
+                        <option value="540" class="high-carb has-gluten meat-product">Quarter Pounder</option>
+                        <option value="300" class="high-carb has-gluten meat-product">Cheeseburger</option>
+                        <option value="510" class="high-carb has-gluten meat-product">McChicken</option>
+                        <option value="380" class="high-carb">Medium Fries</option>
+                        <option value="500" class="high-carb has-gluten meat-product">6pc McNuggets</option>
+                    </optgroup>
+                    <optgroup label="Burger King">
+                        <option value="677" class="high-carb has-gluten meat-product">Whopper</option>
+                        <option value="350" class="high-carb has-gluten meat-product">Cheeseburger BK</option>
+                        <option value="660" class="high-carb has-gluten meat-product">Chicken Royale</option>
+                        <option value="340" class="high-carb">Fries BK</option>
+                    </optgroup>
+                    <optgroup label="KFC">
+                        <option value="320" class="animal-product meat-product">Original Recipe</option>
+                        <option value="490" class="high-carb has-gluten meat-product">Zinger Burger</option>
+                        <option value="290" class="high-carb">KFC Chips</option>
+                    </optgroup>
+                    <optgroup label="Nando's">
+                        <option value="280" class="animal-product meat-product">1/4 Chicken</option>
+                        <option value="450" class="animal-product meat-product">1/2 Chicken</option>
+                        <option value="215" class="animal-product meat-product">Breast Fillet</option>
+                        <option value="510" class="high-carb has-gluten meat-product">Chicken Burger</option>
+                        <option value="390" class="high-carb">Peri-Peri Chips</option>
+                        <option value="280" class="high-carb has-gluten">Garlic Bread</option>
+                    </optgroup>
+                    <optgroup label="Steers">
+                        <option value="650" class="high-carb has-gluten meat-product">King Steer</option>
+                        <option value="580" class="high-carb has-gluten meat-product">Big Steer</option>
+                        <option value="750" class="high-carb has-gluten meat-product">Rib Burger</option>
+                        <option value="520" class="high-carb has-gluten meat-product">Wacky Wednesday</option>
+                        <option value="380" class="high-carb">Chips</option>
+                    </optgroup>
+                    <optgroup label="Snacks">
+                        <option value="235" class="high-sugar high-carb">Chocolate Bar</option>
+                        <option value="59" class="high-sugar high-carb has-gluten">Cookie</option>
+                        <option value="152" class="high-carb">Potato Chips</option>
+                        <option value="200">Mixed Nuts</option>
+                    </optgroup>
+                </select>
+            </div>
+
+            <div class="row">
+                <label>Quantity:</label>
+                <input type="number" id="qty" value="1" min="0.1" step="0.1" onchange="previewCal()">
+            </div>
+
+            <div class="row">
+                <label>Calories:</label>
+                <input type="text" id="preview" value="0 cal" readonly style="font-weight:bold; color:#667eea; background:#f0f0f0;">
+            </div>
+
+            <button class="btn-add" onclick="addFood()">Add to Log</button>
+            <button class="btn-clear" onclick="clearDay()">Clear Day</button>
+        </div>
+
+        <div class="section">
+            <h2 id="logTitle">Today's Food Log</h2>
+            <div class="food-list" id="foodList">
+                <div style="text-align:center; color:#999; padding:20px; font-size:14px;">
+                    No items yet. Start adding!
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 2: WEIGHT -->
+    <div id="tab2" class="tab-content">
+        <div class="section">
+            <h2>Log Weight</h2>
+
+            <div class="row">
+                <label>Date:</label>
+                <input type="date" id="weightDate">
+            </div>
+
+            <div class="row">
+                <label>Weight (kg):</label>
+                <input type="number" id="weightInput" placeholder="75.5" step="0.1">
+            </div>
+
+            <button class="btn-add" onclick="addWeight()">Log Weight</button>
+        </div>
+
+        <div class="section">
+            <h2>Weight Stats</h2>
+
+            <div class="stats">
+                <div class="stat-box">
+                    <div class="stat-label">Current</div>
+                    <div class="stat-value" id="currentWeight">--</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Start</div>
+                    <div class="stat-value" id="startWeight">--</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Change</div>
+                    <div class="stat-value" id="weightChange">--</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Days</div>
+                    <div class="stat-value" id="weightDays">0</div>
+                </div>
+            </div>
+
+            <table class="history-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Weight</th>
+                        <th>Change</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="weightHistoryTable">
+                    <tr>
+                        <td colspan="4" style="text-align:center; color:#999; padding:15px;">
+                            No entries yet
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- TAB 3: HISTORY -->
+    <div id="tab3" class="tab-content">
+        <div class="section">
+            <h2>Calorie History</h2>
+
+            <div class="stats">
+                <div class="stat-box">
+                    <div class="stat-label">7-Day Avg</div>
+                    <div class="stat-value" id="avg7">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">30-Day Avg</div>
+                    <div class="stat-value" id="avg30">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Days Logged</div>
+                    <div class="stat-value" id="daysLogged">0</div>
+                </div>
+            </div>
+
+            <table class="history-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Calories</th>
+                        <th>Weight</th>
+                    </tr>
+                </thead>
+                <tbody id="historyTable">
+                    <tr>
+                        <td colspan="3" style="text-align:center; color:#999; padding:15px;">
+                            No history yet
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <button class="btn-clear" onclick="clearAllHistory()">Clear All History</button>
+        </div>
+    </div>
+
+    <!-- TAB 4: PROFILE -->
+    <div id="tab4" class="tab-content">
+        <div class="section">
+            <h2>Your Profile</h2>
+
+            <div class="row">
+                <label>Gender:</label>
+                <select id="gender">
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                </select>
+            </div>
+
+            <div class="row">
+                <label>Age:</label>
+                <input type="number" id="age" placeholder="30">
+            </div>
+
+            <div class="row">
+                <label>Height (cm):</label>
+                <input type="number" id="height" placeholder="175">
+            </div>
+
+            <div class="row">
+                <label>Activity:</label>
+                <select id="activity">
+                    <option value="1.2">Sedentary</option>
+                    <option value="1.375">Lightly active</option>
+                    <option value="1.55">Moderately active</option>
+                    <option value="1.725">Very active</option>
+                    <option value="1.9">Extra active</option>
+                </select>
+            </div>
+
+            <div class="row">
+                <label>Goal:</label>
+                <select id="goal">
+                    <option value="lose">Lose Weight</option>
+                    <option value="maintain">Maintain</option>
+                    <option value="gain">Gain Weight</option>
+                </select>
+            </div>
+
+            <button class="btn-save" onclick="calcProfile()">Calculate & Save</button>
+
+            <div id="results" style="display:none; margin-top:15px;">
+                <div class="stats">
+                    <div class="stat-box">
+                        <div class="stat-label">BMR</div>
+                        <div class="stat-value" id="bmr">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Maintenance</div>
+                        <div class="stat-value" id="maint">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Goal</div>
+                        <div class="stat-value" id="goalCal">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">BMI</div>
+                        <div class="stat-value" id="bmi">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let allDayData = {};
+    let weightHistory = [];
+    let goalDaily = 0;
+    let currentDietMode = 'none';
+    let currentViewDate = new Date();
+
+    function formatDate(date) {
+        return date.toISOString().split('T')[0];
+    }
+
+    function getDateKey() {
+        return formatDate(currentViewDate);
+    }
+
+    function updateDateDisplay() {
+        const today = formatDate(new Date());
+        const viewing = getDateKey();
+        const dateStr = currentViewDate.toLocaleDateString('en-US', {
+            month: 'short', day: 'numeric', year: 'numeric'
+        });
+
+        document.getElementById('currentDate').textContent = viewing === today ? 'Today' : dateStr;
+        document.getElementById('dateTitle').textContent = viewing === today ? "Today's Total" : dateStr;
+        document.getElementById('logTitle').textContent = viewing === today ? "Today's Food Log" : "Food Log - " + dateStr;
+        document.getElementById('datePickerInput').value = viewing;
+    }
+
+    function changeDate(days) {
+        currentViewDate.setDate(currentViewDate.getDate() + days);
+        updateDateDisplay();
+        loadDayData();
+    }
+
+    function goToToday() {
+        currentViewDate = new Date();
+        updateDateDisplay();
+        loadDayData();
+    }
+
+    function jumpToDate() {
+        const selected = document.getElementById('datePickerInput').value;
+        if (selected) {
+            currentViewDate = new Date(selected + 'T12:00:00');
+            updateDateDisplay();
+            loadDayData();
+        }
+    }
+
+    function changeDietMode() {
+        currentDietMode = document.getElementById('dietMode').value;
+        applyDietMode();
+        saveData();
+    }
+
+    function applyDietMode() {
+        const allClasses = ['.non-halal', '.high-sugar', '.animal-product', '.high-carb', '.has-gluten', '.has-dairy', '.meat-product'];
+        allClasses.forEach(cls => {
+            document.querySelectorAll(cls).forEach(item => {
+                item.style.display = '';
+                item.disabled = false;
+            });
+        });
+        ['grpBeer', 'grpWine', 'grpSpirits'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.display = '';
+        });
+
+        if (currentDietMode === 'halal') {
+            document.querySelectorAll('.non-halal').forEach(item => {
+                item.style.display = 'none';
+                item.disabled = true;
+            });
+            ['grpBeer', 'grpWine', 'grpSpirits'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.style.display = 'none';
+            });
+        } else if (currentDietMode === 'diabetic') {
+            document.querySelectorAll('.high-sugar').forEach(item => {
+                item.style.display = 'none';
+                item.disabled = true;
+            });
+        } else if (currentDietMode === 'vegan') {
+            document.querySelectorAll('.animal-product').forEach(item => {
+                item.style.display = 'none';
+                item.disabled = true;
+            });
+        } else if (currentDietMode === 'vegetarian') {
+            document.querySelectorAll('.meat-product').forEach(item => {
+                item.style.display = 'none';
+                item.disabled = true;
+            });
+        } else if (currentDietMode === 'keto') {
+            document.querySelectorAll('.high-carb').forEach(item => {
+                item.style.display = 'none';
+                item.disabled = true;
+            });
+        } else if (currentDietMode === 'glutenFree') {
+            document.querySelectorAll('.has-gluten').forEach(item => {
+                item.style.display = 'none';
+                item.disabled = true;
+            });
+        } else if (currentDietMode === 'lactoseFree') {
+            document.querySelectorAll('.has-dairy').forEach(item => {
+                item.style.display = 'none';
+                item.disabled = true;
+            });
+        }
+
+        previewCal();
+    }
+
+    function previewCal() {
+        const sel = document.getElementById('foodSel');
+        const qty = parseFloat(document.getElementById('qty').value) || 1;
+
+        if (!sel.value || sel.selectedIndex === 0) {
+            document.getElementById('preview').value = '0 cal';
+            return;
+        }
+
+        const calValue = parseInt(sel.value);
+        if (isNaN(calValue)) {
+            document.getElementById('preview').value = '0 cal';
+            return;
+        }
+
+        const total = calValue * qty;
+        document.getElementById('preview').value = Math.round(total) + ' cal';
+    }
+
+    function addFood() {
+        const sel = document.getElementById('foodSel');
+        const qty = parseFloat(document.getElementById('qty').value);
+
+        if (!sel.value || sel.selectedIndex === 0) {
+            alert('Please select a food');
+            return;
+        }
+        if (qty <= 0 || isNaN(qty)) {
+            alert('Please enter quantity');
+            return;
+        }
+
+        const selectedOption = sel.options[sel.selectedIndex];
+        if (selectedOption.disabled) {
+            alert('This food is not allowed in your diet mode');
+            return;
+        }
+
+        const name = selectedOption.text;
+        const cal = parseInt(sel.value) * qty;
+        const displayName = qty > 1 ? `${qty}x ${name}` : name;
+
+        const now = new Date();
+        const hour = now.getHours();
+        const mealTime = now.toTimeString().slice(0, 5);
+        let mealType = hour >= 5 && hour < 11 ? 'breakfast' :
+                       hour >= 11 && hour < 15 ? 'lunch' :
+                       hour >= 15 && hour < 21 ? 'dinner' : 'snack';
+
+        const dateKey = getDateKey();
+        if (!allDayData[dateKey]) {
+            allDayData[dateKey] = { foods: [], weight: null };
+        }
+
+        allDayData[dateKey].foods.push({
+            name: displayName,
+            cal: Math.round(cal),
+            meal: mealType,
+            time: mealTime
+        });
+
+        updateDisplay();
+        saveData();
+
+        if (getDateKey() === formatDate(new Date())) {
+            checkTodayWarnings(displayName);
+        }
+
+        sel.selectedIndex = 0;
+        document.getElementById('qty').value = 1;
+        document.getElementById('preview').value = '0 cal';
+    }
+
+    function delFood(idx) {
+        const dateKey = getDateKey();
+        if (allDayData[dateKey] && allDayData[dateKey].foods) {
+            allDayData[dateKey].foods.splice(idx, 1);
+            updateDisplay();
+            saveData();
+        }
+    }
+
+    function clearDay() {
+        const dateKey = getDateKey();
+        if (!allDayData[dateKey] || allDayData[dateKey].foods.length === 0) return;
+
+        if (confirm('Clear all food for this day?')) {
+            allDayData[dateKey].foods = [];
+            updateDisplay();
+            saveData();
+        }
+    }
+
+    function loadDayData() {
+        updateDisplay();
+        updateHistoryStats();
+
+        if (getDateKey() === formatDate(new Date())) {
+            analyzeYesterdayAndShowTips();
+        } else {
+            document.getElementById('healthCoach').style.display = 'none';
+        }
+    }
+
+    function checkTodayWarnings(justAdded) {
+        const dateKey = getDateKey();
+        const foods = allDayData[dateKey] ? allDayData[dateKey].foods : [];
+
+        let beerToday = 0;
+        let sodaToday = 0;
+
+        foods.forEach(food => {
+            const name = food.name.toLowerCase();
+            if (name.includes('beer') || name.includes('lager')) beerToday++;
+            if (name.includes('coca-cola') || name.includes('pepsi')) sodaToday++;
+        });
+
+        if ((justAdded.toLowerCase().includes('beer') || justAdded.toLowerCase().includes('lager')) && beerToday >= 3) {
+            alert(`⚠️ That's your ${beerToday}rd beer today! Consider stopping.`);
+        }
+
+        if (justAdded.toLowerCase().includes('water')) {
+            const waterCount = foods.filter(f => f.name.toLowerCase().includes('water')).length;
+            if (waterCount === 8) {
+                alert(`🎉 8 glasses of water! Perfect hydration!`);
+            }
+        }
+    }
+
+    function analyzeYesterdayAndShowTips() {
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayKey = formatDate(yesterday);
+        const yesterdayData = allDayData[yesterdayKey];
+
+        if (!yesterdayData || !yesterdayData.foods || yesterdayData.foods.length === 0) {
+            document.getElementById('healthCoach').style.display = 'none';
+            return;
+        }
+
+        const foods = yesterdayData.foods;
+        const tips = [];
+
+        let beerCount = 0;
+        let sodaCount = 0;
+        let waterCount = 0;
+        let totalCal = foods.reduce((sum, f) => sum + f.cal, 0);
+
+        foods.forEach(food => {
+            const name = food.name.toLowerCase();
+            if (name.includes('beer') || name.includes('lager')) beerCount++;
+            if (name.includes('coca-cola') || name.includes('pepsi')) sodaCount++;
+            if (name.includes('water')) waterCount++;
+        });
+
+        if (beerCount >= 10) {
+            tips.push({
+                type: 'warning',
+                message: `🚨 You had ${beerCount} beers yesterday (${beerCount * 150} cal)! DO NOT repeat this today!`
+            });
+        } else if (beerCount >= 5) {
+            tips.push({
+                type: 'warning',
+                message: `⚠️ ${beerCount} beers yesterday! Limit to 1-2 today.`
+            });
+        }
+
+        if (sodaCount >= 3) {
+            tips.push({
+                type: 'warning',
+                message: `⚠️ ${sodaCount} sodas yesterday (${sodaCount * 140} cal of sugar!). Switch to Coke Zero!`
+            });
+        }
+
+        if (waterCount >= 8) {
+            tips.push({
+                type: 'success',
+                message: `🌟 ${waterCount} glasses of water yesterday! Perfect hydration!`
+            });
+        }
+
+        if (goalDaily > 0 && totalCal <= goalDaily) {
+            tips.push({
+                type: 'success',
+                message: `✅ Great job! You stayed within your goal yesterday!`
+            });
+        }
+
+        if (tips.length > 0) {
+            const coachBox = document.getElementById('healthCoach');
+            coachBox.innerHTML = tips.map(tip => {
+                const boxClass = tip.type === 'warning' ? 'warning-box' :
+                                tip.type === 'success' ? 'success-box' : 'alert-box';
+                return `<div class="${boxClass}"><strong>Health Coach:</strong> ${tip.message}</div>`;
+            }).join('');
+            coachBox.style.display = 'block';
+        }
+    }
+
+    function updateDisplay() {
+        const dateKey = getDateKey();
+        const dayData = allDayData[dateKey] || { foods: [], weight: null };
+        const foods = dayData.foods || [];
+
+        const list = document.getElementById('foodList');
+        let total = 0;
+
+        if (foods.length === 0) {
+            list.innerHTML = '<div style="text-align:center; color:#999; padding:20px;">No items yet!</div>';
+        } else {
+            const mealGroups = {
+                breakfast: { name: 'Breakfast', items: [], cal: 0 },
+                lunch: { name: 'Lunch', items: [], cal: 0 },
+                dinner: { name: 'Dinner', items: [], cal: 0 },
+                snack: { name: 'Snacks', items: [], cal: 0 }
+            };
+
+            foods.forEach((food, i) => {
+                const mealType = food.meal || 'snack';
+                if (mealGroups[mealType]) {
+                    mealGroups[mealType].items.push({ ...food, index: i });
+                    mealGroups[mealType].cal += food.cal;
+                }
+                total += food.cal;
+            });
+
+            let html = '';
+            ['breakfast', 'lunch', 'dinner', 'snack'].forEach(mealKey => {
+                const meal = mealGroups[mealKey];
+                if (meal.items.length > 0) {
+                    html += `
+                        <div class="meal-section">
+                            <div class="meal-header ${mealKey}">
+                                <span>${meal.name}</span>
+                                <span>${meal.cal} cal</span>
+                            </div>
+                    `;
+
+                    meal.items.forEach(food => {
+                        html += `
+                            <div class="food-row">
+                                <div style="flex:1;">
+                                    ${food.time ? `<span class="food-time">${food.time}</span>` : ''}
+                                    <span class="food-name">${food.name}</span>
+                                </div>
+                                <div class="food-actions">
+                                    <span class="food-cal">${food.cal} cal</span>
+                                    <button class="btn-del" onclick="delFood(${food.index})">Delete</button>
+                                </div>
+                            </div>
+                        `;
+                    });
+
+                    html += '</div>';
+                }
+            });
+
+            list.innerHTML = html;
+        }
+
+        document.getElementById('totalCal').innerText = total;
+
+        if (goalDaily > 0) {
+            const pct = Math.round((total / goalDaily) * 100);
+            document.getElementById('goalText').innerText = `${total} / ${goalDaily} cal (${pct}%)`;
+
+            if (pct > 110 && getDateKey() === formatDate(new Date())) {
+                showOverGoalWarning(total - goalDaily);
+            }
+        } else {
+            document.getElementById('goalText').innerText = 'Set profile to see goal';
+        }
+    }
+
+    function showOverGoalWarning(overage) {
+        const coachBox = document.getElementById('healthCoach');
+        const html = `
+            <div class="warning-box">
+                <strong>⚠️ OVER GOAL!</strong> You're ${overage} calories over!<br><br>
+                <strong>Your goal is to LOSE WEIGHT.</strong><br><br>
+                <strong>What to do NOW:</strong><br>
+                • Go for a 45-min walk (burns ~200 cal)<br>
+                • Drink 2 glasses of water<br>
+                • Only eat vegetables if hungry<br>
+                • STOP eating for today<br>
+                • Plan better tomorrow!
+            </div>
+        `;
+
+        if (coachBox.innerHTML) {
+            coachBox.innerHTML = html + coachBox.innerHTML;
+        } else {
+            coachBox.innerHTML = html;
+        }
+        coachBox.style.display = 'block';
+    }
+
+    function showTab(num) {
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+
+        document.getElementById('tab' + num).classList.add('active');
+        document.querySelectorAll('.tab-btn')[num - 1].classList.add('active');
+
+        if (num === 2) {
+            updateWeightDisplay();
+            document.getElementById('weightDate').value = formatDate(new Date());
+        } else if (num === 3) {
+            updateHistoryStats();
+        }
+    }
+
+    function calcProfile() {
+        const gender = document.getElementById('gender').value;
+        const age = parseInt(document.getElementById('age').value);
+        const height = parseFloat(document.getElementById('height').value);
+        const activity = parseFloat(document.getElementById('activity').value);
+        const goal = document.getElementById('goal').value;
+
+        const weight = weightHistory.length > 0 ? weightHistory[0].weight :
+                       parseFloat(prompt('Enter your current weight (kg):'));
+
+        if (!age || !weight || !height) {
+            alert('Please fill all fields and log weight first!');
+            return;
+        }
+
+        const bmr = gender === 'male'
+            ? (10 * weight) + (6.25 * height) - (5 * age) + 5
+            : (10 * weight) + (6.25 * height) - (5 * age) - 161;
+
+        const maint = bmr * activity;
+
+        goalDaily = goal === 'lose' ? maint - 500 :
+                    goal === 'gain' ? maint + 500 : maint;
+
+        document.getElementById('bmr').innerText = Math.round(bmr);
+        document.getElementById('maint').innerText = Math.round(maint);
+        document.getElementById('goalCal').innerText = Math.round(goalDaily);
+        document.getElementById('bmi').innerText = (weight / Math.pow(height/100, 2)).toFixed(1);
+        document.getElementById('results').style.display = 'block';
+
+        updateDisplay();
+        saveData();
+        alert('Profile saved!');
+    }
+
+    function addWeight() {
+        const dateInput = document.getElementById('weightDate').value;
+        const weight = parseFloat(document.getElementById('weightInput').value);
+
+        if (!dateInput || !weight) {
+            alert('Enter date and weight');
+            return;
+        }
+
+        weightHistory = weightHistory.filter(w => w.date !== dateInput);
+        weightHistory.push({ date: dateInput, weight: weight });
+        weightHistory.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        if (!allDayData[dateInput]) {
+            allDayData[dateInput] = { foods: [], weight: null };
+        }
+        allDayData[dateInput].weight = weight;
+
+        saveData();
+        updateWeightDisplay();
+        alert('Weight logged!');
+
+        document.getElementById('weightInput').value = '';
+    }
+
+    function deleteWeight(idx) {
+        if (confirm('Delete this entry?')) {
+            const entry = weightHistory[idx];
+            weightHistory.splice(idx, 1);
+            if (allDayData[entry.date]) {
+                allDayData[entry.date].weight = null;
+            }
+            saveData();
+            updateWeightDisplay();
+        }
+    }
+
+    function updateWeightDisplay() {
+        const table = document.getElementById('weightHistoryTable');
+
+        if (weightHistory.length === 0) {
+            table.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#999; padding:15px;">No entries</td></tr>';
+            document.getElementById('currentWeight').textContent = '--';
+            document.getElementById('startWeight').textContent = '--';
+            document.getElementById('weightChange').textContent = '--';
+            document.getElementById('weightDays').textContent = '0';
+            return;
+        }
+
+        const current = weightHistory[0].weight;
+        const start = weightHistory[weightHistory.length - 1].weight;
+        const change = current - start;
+
+        document.getElementById('currentWeight').textContent = current.toFixed(1);
+        document.getElementById('startWeight').textContent = start.toFixed(1);
+        document.getElementById('weightDays').textContent = weightHistory.length;
+
+        const changeElem = document.getElementById('weightChange');
+        changeElem.textContent = (change >= 0 ? '+' : '') + change.toFixed(1);
+        changeElem.className = 'stat-value ' + (change > 0 ? 'trend-up' : change < 0 ? 'trend-down' : '');
+
+        table.innerHTML = weightHistory.map((entry, i) => {
+            const prevWeight = i < weightHistory.length - 1 ? weightHistory[i + 1].weight : entry.weight;
+            const diff = entry.weight - prevWeight;
+            const diffStr = diff === 0 ? '--' : (diff > 0 ? '+' + diff.toFixed(1) : diff.toFixed(1));
+            const trendClass = diff > 0 ? 'trend-up' : diff < 0 ? 'trend-down' : '';
+
+            return `
+                <tr>
+                    <td>${entry.date}</td>
+                    <td>${entry.weight.toFixed(1)} kg</td>
+                    <td><span class="${trendClass}">${diffStr}</span></td>
+                    <td><button class="btn-del" onclick="deleteWeight(${i})">X</button></td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    function updateHistoryStats() {
+        const table = document.getElementById('historyTable');
+        const dates = Object.keys(allDayData).sort().reverse();
+
+        if (dates.length === 0) {
+            table.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#999; padding:15px;">No history</td></tr>';
+            document.getElementById('avg7').textContent = '0';
+            document.getElementById('avg30').textContent = '0';
+            document.getElementById('daysLogged').textContent = '0';
+            return;
+        }
+
+        const today = new Date();
+        let total7 = 0, count7 = 0;
+        let total30 = 0, count30 = 0;
+
+        dates.forEach(dateKey => {
+            const dayData = allDayData[dateKey];
+            const foods = dayData.foods || [];
+            const calories = foods.reduce((sum, f) => sum + f.cal, 0);
+
+            const dayDate = new Date(dateKey + 'T12:00:00');
+            const diffDays = Math.floor((today - dayDate) / (1000 * 60 * 60 * 24));
+
+            if (diffDays <= 7 && calories > 0) {
+                total7 += calories;
+                count7++;
+            }
+            if (diffDays <= 30 && calories > 0) {
+                total30 += calories;
+                count30++;
+            }
+        });
+
+        document.getElementById('avg7').textContent = count7 > 0 ? Math.round(total7 / count7) : '0';
+        document.getElementById('avg30').textContent = count30 > 0 ? Math.round(total30 / count30) : '0';
+        document.getElementById('daysLogged').textContent = dates.length;
+
+        table.innerHTML = dates.slice(0, 30).map(dateKey => {
+            const dayData = allDayData[dateKey];
+            const foods = dayData.foods || [];
+            const calories = foods.reduce((sum, f) => sum + f.cal, 0);
+            const weight = dayData.weight ? dayData.weight.toFixed(1) + ' kg' : '--';
+
+            return `
+                <tr onclick="jumpToDateFromHistory('${dateKey}')">
+                    <td>${dateKey}</td>
+                    <td>${calories} cal</td>
+                    <td>${weight}</td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    function jumpToDateFromHistory(dateKey) {
+        currentViewDate = new Date(dateKey + 'T12:00:00');
+        updateDateDisplay();
+        loadDayData();
+        showTab(1);
+    }
+
+    function clearAllHistory() {
+        if (Object.keys(allDayData).length === 0) return;
+        if (confirm('Delete ALL history?')) {
+            allDayData = {};
+            saveData();
+            updateHistoryStats();
+        }
+    }
+
+    function saveData() {
+        try {
+            const data = {
+                allDayData: allDayData,
+                weightHistory: weightHistory,
+                goal: goalDaily,
+                dietMode: currentDietMode
+            };
+            localStorage.setItem('calTrackerPro', JSON.stringify(data));
+        } catch(e) {}
+    }
+
+    function loadData() {
+        try {
+            const saved = localStorage.getItem('calTrackerPro');
+            if (saved) {
+                const data = JSON.parse(saved);
+                allDayData = data.allDayData || {};
+                weightHistory = data.weightHistory || [];
+                goalDaily = data.goal || 0;
+                currentDietMode = data.dietMode || 'none';
+
+                document.getElementById('dietMode').value = currentDietMode;
+                applyDietMode();
+                updateDisplay();
+                updateWeightDisplay();
+            }
+        } catch(e) {}
+    }
+
+    window.onload = () => {
+        loadData();
+        updateDateDisplay();
+        document.getElementById('weightDate').value = formatDate(new Date());
+        analyzeYesterdayAndShowTips();
+    };
+</script>
+
+</body>
+</html>
