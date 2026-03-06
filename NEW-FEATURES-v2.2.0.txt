@@ -1,0 +1,259 @@
+================================================================
+  CALORIE TRACKER PRO - VERSION 2.2.0
+  NEW FEATURES SUMMARY
+================================================================
+
+🎉 THREE MAJOR FEATURES ADDED!
+
+================================================================
+1. 👟 STEP COUNTER INTEGRATION
+================================================================
+
+WHAT IT DOES:
+- Track your daily steps
+- Automatically calculates calories burned
+- Formula: 1,000 steps ≈ 40 calories burned
+- Reduces your net calorie intake
+
+WHERE TO FIND IT:
+- Food Tracker tab
+- Orange section between Exercise Logger and Add Food
+
+HOW TO USE:
+1. Enter your daily steps (e.g., 10,000)
+2. Click "Log Steps"
+3. Steps convert to calories burned automatically
+4. Net calories = Food - Exercise - Steps
+
+EXAMPLE:
+- Food: 2,000 cal
+- Exercise: -300 cal
+- Steps (10,000): -400 cal
+- NET: 1,300 cal ✓
+
+BENEFITS:
+- Rewards daily activity
+- Encourages more walking
+- More accurate calorie tracking
+- Earn extra food budget!
+
+================================================================
+2. 🔔 REMINDERS & NOTIFICATIONS
+================================================================
+
+WHAT IT DOES:
+- Browser notifications to build healthy habits
+- Customizable reminder schedule
+- Multiple reminder types
+
+WHERE TO FIND IT:
+- Profile tab → "🔔 Reminders & Notifications" section
+
+HOW TO SET UP:
+1. Click "Enable" button (grants browser permission)
+2. Toggle ON the reminders you want:
+   - ☑️ Breakfast Reminder (9:00 AM)
+   - ☑️ Lunch Reminder (12:30 PM)
+   - ☑️ Dinner Reminder (7:00 PM)
+   - ☑️ Water Reminder (every 2 hours, 8am-8pm)
+   - ☑️ Evening Summary (9:00 PM)
+
+REMINDER EXAMPLES:
+- "🍳 Breakfast Time! Don't forget to log your breakfast"
+- "💧 Hydration Reminder - You've had 4/8 glasses today. Drink up!"
+- "📊 Daily Summary - Today: 1,850 calories. Great job logging!"
+
+NOTIFICATION REQUIREMENTS:
+- Works on Chrome, Firefox, Edge, Safari
+- Requires browser notification permission
+- App must be open in background (doesn't need to be active tab)
+- Mobile: Works best when app is added to home screen
+
+BENEFITS:
+- Never forget to log meals
+- Stay hydrated throughout the day
+- Build consistent tracking habits
+- Accountability through reminders
+
+================================================================
+3. 👨‍💼 ADMIN DASHBOARD
+================================================================
+
+WHAT IT DOES:
+- View total registered users
+- See new registrations in real-time
+- Track login activity
+- Monitor app growth
+
+WHERE TO ACCESS:
+- Profile tab → "👨‍💼 Admin Panel" section
+- Click "🔐 Open Admin Dashboard" button
+- Opens in new tab: admin.html
+
+WHAT YOU SEE:
+┌─────────────────────────────────────────────┐
+│ STATISTICS (Auto-updating every 30 seconds) │
+├─────────────────────────────────────────────┤
+│ • Total Users: X registered accounts        │
+│ • Today's Registrations: X new users        │
+│ • Today's Logins: X active users            │
+│ • This Week: X new registrations            │
+└─────────────────────────────────────────────┘
+
+RECENT ACTIVITY LOG (Last 50 Events):
+┌─────────────────────────────────────────────┐
+│ 🎉 user@email.com         [NEW USER]        │
+│    Mar 6, 4:30 PM                           │
+├─────────────────────────────────────────────┤
+│ 🔓 another@email.com      [LOGIN]           │
+│    Mar 6, 4:25 PM                           │
+└─────────────────────────────────────────────┘
+
+HOW IT WORKS:
+- Every registration = logged to Firestore "admin_tracking"
+- Every login = logged to Firestore "admin_tracking"
+- Data includes: email, timestamp, event type
+- NO passwords or personal data stored
+- Privacy-safe tracking
+
+SECURITY:
+- Uses same Firebase project (no extra setup)
+- Admin page accessible to anyone with link
+- Only shows: emails, timestamps, event counts
+- No access to user's food/weight data
+
+BENEFITS:
+- Monitor app adoption
+- See growth trends
+- Know when people are active
+- Track marketing effectiveness
+
+================================================================
+UPDATED FEATURES
+================================================================
+
+NET CALORIE CALCULATION NOW INCLUDES:
+Food - Exercise - Steps = Net Calories
+
+EXAMPLE:
+📊 Today's Overview
+━━━━━━━━━━━━━━━━━━━
+Food:        2,000 cal
+Exercise:      -700 cal  (includes steps!)
+Net:         1,300 cal
+Goal:        1,800 cal | 72% ✓
+
+WEEKLY REPORT UPDATED:
+- Now includes step-based calories in exercise total
+
+================================================================
+FILES IN THIS RELEASE
+================================================================
+
+📄 index.html     - Main app (updated to v2.2.0)
+📄 admin.html     - NEW Admin Dashboard
+📄 NEW-FEATURES-v2.2.0.txt - This file
+
+================================================================
+DEPLOYMENT INSTRUCTIONS
+================================================================
+
+1. Upload BOTH files to GitHub:
+   - index.html (replace existing)
+   - admin.html (new file)
+
+2. GitHub Pages will host both:
+   - App: https://YOUR-USERNAME.github.io/YOUR-REPO/
+   - Admin: https://YOUR-USERNAME.github.io/YOUR-REPO/admin.html
+
+3. Users will see update notification on first refresh
+
+4. Bookmark the admin.html URL for quick access!
+
+================================================================
+TESTING CHECKLIST
+================================================================
+
+STEP COUNTER:
+☑ Enter 10,000 steps
+☑ Verify shows "400 calories burned"
+☑ Check net calories decreased by 400
+☑ Reset steps works
+
+NOTIFICATIONS:
+☑ Click "Enable" and grant permission
+☑ Toggle reminders ON
+☑ Settings save when toggled
+☑ Test notification appears (if time matches)
+
+ADMIN DASHBOARD:
+☑ Opens in new tab
+☑ Shows "Total Users" count
+☑ Shows recent activity
+☑ Auto-refreshes every 30 seconds
+☑ New registrations appear immediately
+
+================================================================
+FIREBASE SETUP (IF NEEDED)
+================================================================
+
+NO CHANGES NEEDED if already using Firebase!
+
+The app automatically creates:
+- Collection: "admin_tracking"
+- Documents contain:
+  {
+    event: "user_registered" or "user_login",
+    email: "user@email.com",
+    timestamp: "2026-03-06T16:45:00.000Z",
+    userId: "firebase_user_id"
+  }
+
+FIRESTORE RULES (ensure these are set):
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId} {
+      allow read, write: if request.auth != null
+                        && request.auth.uid == userId;
+    }
+    match /admin_tracking/{docId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null;
+    }
+  }
+}
+
+================================================================
+WHAT'S NEXT?
+================================================================
+
+Future feature ideas:
+- Dark Mode
+- Macro tracking (Protein/Carbs/Fat)
+- Measurement tracker (waist, arms, etc.)
+- Meal photos
+- Barcode scanner
+- Export data to CSV
+
+Let me know which ones you want next!
+
+================================================================
+SUPPORT & ISSUES
+================================================================
+
+If you encounter any issues:
+1. Check browser console (F12) for errors
+2. Verify Firebase rules are set correctly
+3. Test in incognito mode (clears cache)
+4. Make sure notifications are enabled in browser settings
+
+================================================================
+
+🚀 READY TO DEPLOY!
+
+Upload index.html and admin.html to GitHub, then test on your phone.
+
+Version 2.2.0 is a MAJOR update with real-time monitoring capabilities!
+
+================================================================

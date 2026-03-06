@@ -516,6 +516,70 @@
             font-weight: bold;
             color: #667eea;
         }
+        .reminder-settings {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        .reminder-toggle {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #ddd;
+        }
+        .reminder-toggle:last-child {
+            border-bottom: none;
+        }
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 24px;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.4s;
+            border-radius: 24px;
+        }
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+        .toggle-switch input:checked + .toggle-slider {
+            background-color: #4caf50;
+        }
+        .toggle-switch input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
+        .notification-badge {
+            background: #ff5722;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+            display: inline-block;
+            margin-left: 5px;
+        }
     </style>
 </head>
 <body>
@@ -746,6 +810,26 @@
             <button class="btn-add" onclick="addExercise()">Log Exercise</button>
 
             <div id="exerciseList" style="margin-top:15px;"></div>
+        </div>
+
+        <!-- STEP COUNTER -->
+        <div class="section" style="background-color:#fff3e0; border-left-color:#ff9800;">
+            <h2 style="color:#e65100;">👟 Daily Steps</h2>
+            <p style="color:#e65100; font-size:13px; margin-bottom:10px;">Track your steps for extra calories! (1,000 steps ≈ 40 calories burned)</p>
+
+            <div class="row">
+                <label style="color:#e65100;">Today's Steps:</label>
+                <input type="number" id="stepsInput" placeholder="e.g., 10000" min="0" step="100">
+            </div>
+
+            <div style="background:white; padding:15px; border-radius:8px; margin:10px 0; text-align:center;">
+                <div style="font-size:48px; font-weight:bold; color:#ff9800;" id="stepCount">0</div>
+                <div style="font-size:14px; color:#666;">steps today</div>
+                <div style="margin-top:10px; font-size:16px; font-weight:bold; color:#4caf50;" id="stepCalories">0 calories burned</div>
+            </div>
+
+            <button class="btn-add" onclick="logSteps()">Log Steps</button>
+            <button class="btn-clear" onclick="resetSteps()">Reset Steps</button>
         </div>
 
         <div class="section">
@@ -1114,6 +1198,89 @@
 
             <button class="btn-save" onclick="changePassword()">Update Password</button>
         </div>
+
+        <div class="section" style="background-color:#e8f5e9; border-left-color:#4caf50;">
+            <h2 style="color:#2e7d32;">🔔 Reminders & Notifications</h2>
+            <p style="color:#2e7d32; font-size:13px; margin-bottom:10px;">Get reminders to help build healthy habits</p>
+
+            <div class="reminder-settings">
+                <div class="reminder-toggle">
+                    <div>
+                        <strong>Enable Notifications</strong>
+                        <div style="font-size:11px; color:#666;">Allow browser notifications</div>
+                    </div>
+                    <button class="btn-add" onclick="requestNotificationPermission()" id="notifPermBtn" style="padding:8px 15px; font-size:13px;">Enable</button>
+                </div>
+
+                <div class="reminder-toggle">
+                    <div>
+                        <strong>Breakfast Reminder</strong>
+                        <div style="font-size:11px; color:#666;">9:00 AM - "Log your breakfast!"</div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="reminderBreakfast" onchange="saveReminderSettings()">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+
+                <div class="reminder-toggle">
+                    <div>
+                        <strong>Lunch Reminder</strong>
+                        <div style="font-size:11px; color:#666;">12:30 PM - "Log your lunch!"</div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="reminderLunch" onchange="saveReminderSettings()">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+
+                <div class="reminder-toggle">
+                    <div>
+                        <strong>Dinner Reminder</strong>
+                        <div style="font-size:11px; color:#666;">7:00 PM - "Log your dinner!"</div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="reminderDinner" onchange="saveReminderSettings()">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+
+                <div class="reminder-toggle">
+                    <div>
+                        <strong>Water Reminder</strong>
+                        <div style="font-size:11px; color:#666;">Every 2 hours - "Drink water!"</div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="reminderWater" onchange="saveReminderSettings()">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+
+                <div class="reminder-toggle">
+                    <div>
+                        <strong>Evening Summary</strong>
+                        <div style="font-size:11px; color:#666;">9:00 PM - Daily summary reminder</div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="reminderEvening" onchange="saveReminderSettings()">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" style="background-color:#e3f2fd; border-left-color:#2196f3;">
+            <h2 style="color:#1565c0;">👨‍💼 Admin Panel</h2>
+            <p style="color:#1565c0; font-size:13px; margin-bottom:15px;">View app statistics and user registrations</p>
+
+            <a href="admin.html" target="_blank" style="text-decoration:none;">
+                <button class="btn-add" style="width:100%;">🔐 Open Admin Dashboard</button>
+            </a>
+
+            <p style="text-align:center; margin-top:10px; font-size:12px; color:#666;">
+                View total users, registrations, and activity stats
+            </p>
+        </div>
     </div>
 
     <!-- TAB 5: RECIPE BOOK -->
@@ -1364,7 +1531,7 @@
     // ============================================
     // APP VERSION - Update this when you make changes!
     // ============================================
-    const APP_VERSION = "2.1.0"; // Bump this number when updating the app
+    const APP_VERSION = "2.2.0"; // Bump this number when updating the app
     console.log(`🚀 Calorie Tracker Pro v${APP_VERSION}`);
 
     // ============================================
@@ -1420,7 +1587,7 @@
             // Show update notification
             setTimeout(() => {
                 if (confirm(`✨ App updated to v${currentVersion}!\n\nNew features and improvements available.\n\nWould you like to see what's new?`)) {
-                    alert(`Version ${currentVersion} Updates:\n\n💧 Water Intake Tracker (8 glasses goal)\n🏃 Exercise Logger with calorie burn\n🔥 Daily Streak Counter\n➕ Quick Add Custom Food\n📊 Weekly Summary Report\n✅ Net calories calculation (Food - Exercise)\n✅ Recipe filtering by diet mode\n✅ Smart food search\n✅ Password management`);
+                    alert(`Version ${currentVersion} Updates:\n\n👟 Step Counter (auto-calculates calories burned)\n🔔 Meal & Water Reminders (customizable)\n👨‍💼 Admin Dashboard (track registrations)\n💧 Water Intake Tracker\n🏃 Exercise Logger\n🔥 Daily Streak Counter\n➕ Quick Add Custom Food\n📊 Weekly Summary Report\n🍺 South African Beers added\n✅ Net calories (Food - Exercise - Steps)`);
                 }
             }, 2000);
         }
@@ -1519,6 +1686,7 @@
 
         auth.createUserWithEmailAndPassword(email, password)
             .then((userCredential) => {
+                trackUserRegistration(email); // Track new registration
                 alert('Account created successfully! Welcome!');
                 // Will trigger onAuthStateChanged
             })
@@ -1538,6 +1706,7 @@
 
         auth.signInWithEmailAndPassword(email, password)
             .then((userCredential) => {
+                trackUserLogin(email); // Track login
                 // Will trigger onAuthStateChanged
             })
             .catch((error) => {
@@ -1601,6 +1770,7 @@
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('appScreen').style.display = 'block';
             loadDataFromFirebase();
+            checkNotificationPermission(); // Check notification status
         } else {
             // User is logged out
             currentUser = null;
@@ -2296,14 +2466,17 @@
 
         document.getElementById('totalCal').innerText = total;
 
-        // Calculate net calories (food - exercise)
+        // Calculate net calories (food - exercise - steps)
         const exercises = dayData.exercises || [];
         const exerciseCal = exercises.reduce((sum, e) => sum + e.calories, 0);
-        const netCal = total - exerciseCal;
+        const steps = dayData.steps || 0;
+        const stepCalories = Math.round((steps / 1000) * 40);
+        const totalBurned = exerciseCal + stepCalories;
+        const netCal = total - totalBurned;
 
         // Update net calories box
         document.getElementById('foodCalDisplay').textContent = total;
-        document.getElementById('exerciseCalDisplay').textContent = exerciseCal;
+        document.getElementById('exerciseCalDisplay').textContent = totalBurned;
         document.getElementById('netCalDisplay').textContent = netCal;
 
         if (goalDaily > 0) {
@@ -2319,9 +2492,10 @@
             document.getElementById('goalComparison').textContent = 'Set your goal in Profile';
         }
 
-        // Update water, exercise, and streak displays
+        // Update water, exercise, steps, and streak displays
         updateWaterDisplay();
         updateExerciseDisplay();
+        updateStepsDisplay();
         updateStreakDisplay();
     }
 
@@ -2854,6 +3028,213 @@
         document.getElementById('weeklyOnTrack').textContent = `${daysOnTrack}/7`;
         document.getElementById('weeklyExercise').textContent = `-${totalExercise}`;
         document.getElementById('weeklyWater').textContent = `${avgWater}/8`;
+    }
+
+    // ============================================
+    // STEP COUNTER FUNCTIONS
+    // ============================================
+    function logSteps() {
+        const steps = parseInt(document.getElementById('stepsInput').value);
+        if (!steps || steps < 0) {
+            alert('Please enter valid step count');
+            return;
+        }
+
+        const dateKey = getDateKey();
+        if (!allDayData[dateKey]) {
+            allDayData[dateKey] = { foods: [], weight: null, water: 0, exercises: [], steps: 0 };
+        }
+        if (!allDayData[dateKey].steps) allDayData[dateKey].steps = 0;
+
+        allDayData[dateKey].steps = steps;
+
+        updateStepsDisplay();
+        updateDisplay(); // Recalculate net calories with steps
+        saveDataToFirebase();
+
+        alert(`✅ ${steps.toLocaleString()} steps logged!`);
+    }
+
+    function resetSteps() {
+        const dateKey = getDateKey();
+        if (allDayData[dateKey]) {
+            allDayData[dateKey].steps = 0;
+            document.getElementById('stepsInput').value = '';
+            updateStepsDisplay();
+            updateDisplay();
+            saveDataToFirebase();
+        }
+    }
+
+    function updateStepsDisplay() {
+        const dateKey = getDateKey();
+        const steps = allDayData[dateKey] && allDayData[dateKey].steps ? allDayData[dateKey].steps : 0;
+
+        // Calculate calories burned (1000 steps ≈ 40 cal)
+        const stepCalories = Math.round((steps / 1000) * 40);
+
+        document.getElementById('stepCount').textContent = steps.toLocaleString();
+        document.getElementById('stepCalories').textContent = `${stepCalories} calories burned`;
+        document.getElementById('stepsInput').value = steps > 0 ? steps : '';
+    }
+
+    // ============================================
+    // NOTIFICATION & REMINDER FUNCTIONS
+    // ============================================
+    let notificationPermission = 'default';
+    let reminderIntervals = [];
+
+    async function requestNotificationPermission() {
+        if (!('Notification' in window)) {
+            alert('This browser does not support notifications');
+            return;
+        }
+
+        try {
+            const permission = await Notification.requestPermission();
+            notificationPermission = permission;
+
+            if (permission === 'granted') {
+                document.getElementById('notifPermBtn').textContent = '✓ Enabled';
+                document.getElementById('notifPermBtn').style.background = '#4caf50';
+                new Notification('🎉 Notifications Enabled!', {
+                    body: 'You\'ll now receive reminders to help build healthy habits',
+                    icon: 'https://via.placeholder.com/128?text=📊'
+                });
+                loadReminderSettings();
+                startReminders();
+            } else {
+                alert('Please enable notifications in your browser settings');
+            }
+        } catch (error) {
+            alert('Error requesting notification permission');
+        }
+    }
+
+    function checkNotificationPermission() {
+        if ('Notification' in window) {
+            notificationPermission = Notification.permission;
+            if (notificationPermission === 'granted') {
+                document.getElementById('notifPermBtn').textContent = '✓ Enabled';
+                document.getElementById('notifPermBtn').style.background = '#4caf50';
+                loadReminderSettings();
+                startReminders();
+            }
+        }
+    }
+
+    function sendNotification(title, body) {
+        if (notificationPermission === 'granted') {
+            new Notification(title, {
+                body: body,
+                icon: 'https://via.placeholder.com/128?text=📊',
+                badge: 'https://via.placeholder.com/96?text=🔔',
+                vibrate: [200, 100, 200]
+            });
+        }
+    }
+
+    function saveReminderSettings() {
+        const settings = {
+            breakfast: document.getElementById('reminderBreakfast').checked,
+            lunch: document.getElementById('reminderLunch').checked,
+            dinner: document.getElementById('reminderDinner').checked,
+            water: document.getElementById('reminderWater').checked,
+            evening: document.getElementById('reminderEvening').checked
+        };
+        localStorage.setItem('reminderSettings', JSON.stringify(settings));
+        startReminders();
+    }
+
+    function loadReminderSettings() {
+        const saved = localStorage.getItem('reminderSettings');
+        if (saved) {
+            const settings = JSON.parse(saved);
+            document.getElementById('reminderBreakfast').checked = settings.breakfast || false;
+            document.getElementById('reminderLunch').checked = settings.lunch || false;
+            document.getElementById('reminderDinner').checked = settings.dinner || false;
+            document.getElementById('reminderWater').checked = settings.water || false;
+            document.getElementById('reminderEvening').checked = settings.evening || false;
+        }
+    }
+
+    function startReminders() {
+        // Clear existing intervals
+        reminderIntervals.forEach(interval => clearInterval(interval));
+        reminderIntervals = [];
+
+        if (notificationPermission !== 'granted') return;
+
+        const settings = JSON.parse(localStorage.getItem('reminderSettings') || '{}');
+
+        // Check reminders every minute
+        const interval = setInterval(() => {
+            const now = new Date();
+            const hour = now.getHours();
+            const minute = now.getMinutes();
+            const time = `${hour}:${minute}`;
+
+            // Breakfast (9:00 AM)
+            if (settings.breakfast && time === '9:0') {
+                sendNotification('🍳 Breakfast Time!', 'Don\'t forget to log your breakfast');
+            }
+
+            // Lunch (12:30 PM)
+            if (settings.lunch && time === '12:30') {
+                sendNotification('🍽️ Lunch Time!', 'Remember to log your lunch');
+            }
+
+            // Dinner (7:00 PM)
+            if (settings.dinner && time === '19:0') {
+                sendNotification('🌙 Dinner Time!', 'Log your dinner to stay on track');
+            }
+
+            // Evening Summary (9:00 PM)
+            if (settings.evening && time === '21:0') {
+                const dateKey = getDateKey();
+                const foods = allDayData[dateKey] ? allDayData[dateKey].foods : [];
+                const totalCal = foods.reduce((sum, f) => sum + f.cal, 0);
+                sendNotification('📊 Daily Summary', `Today: ${totalCal} calories. Great job logging!`);
+            }
+
+            // Water reminder (every 2 hours if enabled)
+            if (settings.water && minute === 0 && hour % 2 === 0 && hour >= 8 && hour <= 20) {
+                const dateKey = getDateKey();
+                const water = allDayData[dateKey] && allDayData[dateKey].water ? allDayData[dateKey].water : 0;
+                if (water < 8) {
+                    sendNotification('💧 Hydration Reminder', `You've had ${water}/8 glasses today. Drink up!`);
+                }
+            }
+        }, 60000); // Check every minute
+
+        reminderIntervals.push(interval);
+    }
+
+    // ============================================
+    // ADMIN TRACKING FUNCTIONS
+    // ============================================
+    function trackUserRegistration(userEmail) {
+        // Log to admin collection in Firestore
+        if (db && auth.currentUser) {
+            db.collection('admin_tracking').add({
+                event: 'user_registered',
+                email: userEmail,
+                timestamp: new Date().toISOString(),
+                userId: auth.currentUser.uid
+            }).catch(err => console.log('Admin tracking error:', err));
+        }
+    }
+
+    function trackUserLogin(userEmail) {
+        // Log to admin collection in Firestore
+        if (db && auth.currentUser) {
+            db.collection('admin_tracking').add({
+                event: 'user_login',
+                email: userEmail,
+                timestamp: new Date().toISOString(),
+                userId: auth.currentUser.uid
+            }).catch(err => console.log('Admin tracking error:', err));
+        }
     }
 
     // Hide suggestions box when clicking outside
