@@ -405,6 +405,117 @@
             background: white;
             color: #667eea;
         }
+        /* NEW FEATURES CSS */
+        .water-tracker {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .water-glasses {
+            display: flex;
+            gap: 5px;
+            flex: 1;
+        }
+        .water-glass {
+            font-size: 24px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .water-glass:active {
+            transform: scale(1.2);
+        }
+        .streak-badge {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 10px 0;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        .streak-number {
+            font-size: 36px;
+            display: block;
+            margin: 5px 0;
+        }
+        .exercise-item {
+            background: #e8f5e9;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 5px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid #4caf50;
+        }
+        .exercise-cal {
+            color: #4caf50;
+            font-weight: bold;
+        }
+        .net-calories-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin: 15px 0;
+        }
+        .net-calories-box h3 {
+            margin: 0 0 10px 0;
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        .net-value {
+            font-size: 42px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .calorie-breakdown {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 15px;
+            font-size: 13px;
+        }
+        .calorie-breakdown div {
+            text-align: center;
+        }
+        .quick-add-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 10px 0;
+            width: 100%;
+        }
+        .weekly-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .weekly-stat-card {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #ddd;
+            text-align: center;
+        }
+        .weekly-stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        .weekly-stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
     </style>
 </head>
 <body>
@@ -520,7 +631,35 @@
 
     <div id="healthCoach" style="display:none;"></div>
 
-    <div class="total-box">
+    <!-- STREAK COUNTER -->
+    <div id="streakBadge" class="streak-badge" style="display:none;">
+        🔥 <span class="streak-number" id="streakNumber">0</span>
+        <span id="streakText">Day Streak!</span>
+    </div>
+
+    <!-- NET CALORIES BOX -->
+    <div id="netCaloriesBox" class="net-calories-box">
+        <h3>📊 Today's Overview</h3>
+        <div class="calorie-breakdown">
+            <div>
+                <div style="opacity:0.8;">Food</div>
+                <div style="font-size:20px; font-weight:bold;" id="foodCalDisplay">0</div>
+            </div>
+            <div style="font-size:24px; line-height:40px;">−</div>
+            <div>
+                <div style="opacity:0.8;">Exercise</div>
+                <div style="font-size:20px; font-weight:bold;" id="exerciseCalDisplay">0</div>
+            </div>
+            <div style="font-size:24px; line-height:40px;">=</div>
+            <div>
+                <div style="opacity:0.8;">Net</div>
+                <div style="font-size:20px; font-weight:bold;" id="netCalDisplay">0</div>
+            </div>
+        </div>
+        <div style="margin-top:10px; font-size:14px; opacity:0.9;" id="goalComparison">Goal: 0 cal</div>
+    </div>
+
+    <div class="total-box" style="display:none;">
         <h2 id="dateTitle">Today's Total</h2>
         <div class="big" id="totalCal">0</div>
         <div id="goalText">No goal set</div>
@@ -561,8 +700,59 @@
             <div class="favorites-grid" id="favoritesList"></div>
         </div>
 
+        <!-- WATER TRACKER -->
+        <div class="section" style="background-color:#e3f2fd; border-left-color:#2196f3;">
+            <h2 style="color:#1976d2;">💧 Water Intake</h2>
+            <div class="water-tracker">
+                <div class="water-glasses" id="waterGlasses">
+                    <span class="water-glass" onclick="toggleWater(0)">💧</span>
+                    <span class="water-glass" onclick="toggleWater(1)">💧</span>
+                    <span class="water-glass" onclick="toggleWater(2)">💧</span>
+                    <span class="water-glass" onclick="toggleWater(3)">💧</span>
+                    <span class="water-glass" onclick="toggleWater(4)">💧</span>
+                    <span class="water-glass" onclick="toggleWater(5)">💧</span>
+                    <span class="water-glass" onclick="toggleWater(6)">💧</span>
+                    <span class="water-glass" onclick="toggleWater(7)">💧</span>
+                </div>
+                <div>
+                    <span id="waterCount" style="font-weight:bold; color:#1976d2; font-size:18px;">0/8</span>
+                    <div style="font-size:11px; color:#666;">glasses</div>
+                </div>
+            </div>
+            <button class="btn-clear" onclick="resetWater()" style="margin-top:10px;">Reset Water</button>
+        </div>
+
+        <!-- EXERCISE LOGGER -->
+        <div class="section" style="background-color:#e8f5e9; border-left-color:#4caf50;">
+            <h2 style="color:#2e7d32;">🏃 Exercise Logger</h2>
+            <div class="row">
+                <label style="color:#2e7d32;">Activity:</label>
+                <select id="exerciseType">
+                    <option value="">-- Select Exercise --</option>
+                    <option value="30">Walking 30min (-150 cal)</option>
+                    <option value="60">Walking 60min (-300 cal)</option>
+                    <option value="100">Running 30min (-350 cal)</option>
+                    <option value="120">Running 60min (-700 cal)</option>
+                    <option value="80">Gym Workout 30min (-200 cal)</option>
+                    <option value="160">Gym Workout 60min (-400 cal)</option>
+                    <option value="70">Cycling 30min (-250 cal)</option>
+                    <option value="140">Cycling 60min (-500 cal)</option>
+                    <option value="90">Swimming 30min (-300 cal)</option>
+                    <option value="180">Swimming 60min (-600 cal)</option>
+                    <option value="50">Yoga 30min (-100 cal)</option>
+                    <option value="40">Sports 30min (-180 cal)</option>
+                </select>
+            </div>
+            <button class="btn-add" onclick="addExercise()">Log Exercise</button>
+
+            <div id="exerciseList" style="margin-top:15px;"></div>
+        </div>
+
         <div class="section">
             <h2>Add Food</h2>
+
+            <!-- QUICK ADD CUSTOM FOOD -->
+            <button class="quick-add-btn" onclick="showQuickAddModal()">➕ Quick Add Custom Food</button>
 
             <div class="row">
                 <label>🔍 Search Food:</label>
@@ -609,10 +799,20 @@
                         <option value="150" class="high-sugar high-carb">Pepsi</option>
                         <option value="112" class="high-sugar high-carb">Orange Juice</option>
                     </optgroup>
-                    <optgroup label="Beer" id="grpBeer">
+                    <optgroup label="Beer (South African & International)" id="grpBeer">
                         <option value="153">Regular Beer</option>
                         <option value="103">Light Beer</option>
                         <option value="148">Castle Lager</option>
+                        <option value="145">Castle Lite</option>
+                        <option value="149">Black Label</option>
+                        <option value="150">Stella Artois</option>
+                        <option value="152">Heineken</option>
+                        <option value="225">Savanna Dry (330ml)</option>
+                        <option value="140">Hansa Pilsener</option>
+                        <option value="147">Windhoek Lager</option>
+                        <option value="146">Carling Black Label</option>
+                        <option value="151">Amstel Lager</option>
+                        <option value="105">Brutal Fruit (275ml)</option>
                     </optgroup>
                     <optgroup label="Wine" id="grpWine">
                         <option value="125">Red Wine</option>
@@ -785,6 +985,30 @@
 
     <!-- TAB 3: HISTORY -->
     <div id="tab3" class="tab-content">
+        <!-- WEEKLY SUMMARY REPORT -->
+        <div class="section" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none;">
+            <h2 style="color: white; border-bottom: 2px solid rgba(255,255,255,0.3);">📊 Weekly Summary Report</h2>
+            <div class="weekly-stats-grid">
+                <div class="weekly-stat-card">
+                    <div class="weekly-stat-label">Avg Daily Calories</div>
+                    <div class="weekly-stat-value" id="weeklyAvgCal">0</div>
+                </div>
+                <div class="weekly-stat-card">
+                    <div class="weekly-stat-label">Days on Track</div>
+                    <div class="weekly-stat-value" id="weeklyOnTrack">0/7</div>
+                </div>
+                <div class="weekly-stat-card">
+                    <div class="weekly-stat-label">Total Exercise</div>
+                    <div class="weekly-stat-value" id="weeklyExercise">0</div>
+                </div>
+                <div class="weekly-stat-card">
+                    <div class="weekly-stat-label">Avg Water</div>
+                    <div class="weekly-stat-value" id="weeklyWater">0/8</div>
+                </div>
+            </div>
+            <div style="text-align:center; margin-top:10px; font-size:13px; opacity:0.9;">Last 7 Days Performance</div>
+        </div>
+
         <div class="section">
             <h2>Calorie History</h2>
             <div class="stats">
@@ -1114,11 +1338,33 @@
 </div>
 </div>
 
+<!-- QUICK ADD CUSTOM FOOD MODAL -->
+<div id="customFoodModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:10000; display:none; align-items:center; justify-content:center;">
+    <div style="background:white; padding:20px; border-radius:15px; max-width:400px; width:90%; box-shadow:0 10px 40px rgba(0,0,0,0.3);">
+        <h2 style="color:#667eea; margin-bottom:15px;">➕ Add Custom Food</h2>
+
+        <div class="row">
+            <label>Food Name:</label>
+            <input type="text" id="customFoodName" placeholder="e.g., Homemade Salad">
+        </div>
+
+        <div class="row">
+            <label>Calories:</label>
+            <input type="number" id="customFoodCal" placeholder="e.g., 250" min="0">
+        </div>
+
+        <div style="display:flex; gap:10px; margin-top:15px;">
+            <button class="btn-add" onclick="saveCustomFood()" style="flex:1;">Add to Log</button>
+            <button class="btn-clear" onclick="closeCustomFoodModal()" style="flex:1;">Cancel</button>
+        </div>
+    </div>
+</div>
+
 <script>
     // ============================================
     // APP VERSION - Update this when you make changes!
     // ============================================
-    const APP_VERSION = "2.0.0"; // Bump this number when updating the app
+    const APP_VERSION = "2.1.0"; // Bump this number when updating the app
     console.log(`🚀 Calorie Tracker Pro v${APP_VERSION}`);
 
     // ============================================
@@ -1174,7 +1420,7 @@
             // Show update notification
             setTimeout(() => {
                 if (confirm(`✨ App updated to v${currentVersion}!\n\nNew features and improvements available.\n\nWould you like to see what's new?`)) {
-                    alert(`Version ${currentVersion} Updates:\n\n✅ Recipe Book now filters by dietary mode\n✅ Smart food search with suggestions\n✅ Password reset & change password\n✅ Improved health tips\n✅ Better recipe categorization`);
+                    alert(`Version ${currentVersion} Updates:\n\n💧 Water Intake Tracker (8 glasses goal)\n🏃 Exercise Logger with calorie burn\n🔥 Daily Streak Counter\n➕ Quick Add Custom Food\n📊 Weekly Summary Report\n✅ Net calories calculation (Food - Exercise)\n✅ Recipe filtering by diet mode\n✅ Smart food search\n✅ Password management`);
                 }
             }, 2000);
         }
@@ -1403,6 +1649,7 @@
                     updateDisplay();
                     updateWeightDisplay();
                     updateDateDisplay();
+                    updateWeeklySummary();
                     document.getElementById('weightDate').value = formatDate(new Date());
                     analyzeYesterdayAndShowTips();
                 } else {
@@ -1778,8 +2025,10 @@
 
         const dateKey = getDateKey();
         if (!allDayData[dateKey]) {
-            allDayData[dateKey] = { foods: [], weight: null };
+            allDayData[dateKey] = { foods: [], weight: null, water: 0, exercises: [] };
         }
+        if (!allDayData[dateKey].water) allDayData[dateKey].water = 0;
+        if (!allDayData[dateKey].exercises) allDayData[dateKey].exercises = [];
 
         allDayData[dateKey].foods.push({
             name: name,
@@ -1834,8 +2083,10 @@
 
         const dateKey = getDateKey();
         if (!allDayData[dateKey]) {
-            allDayData[dateKey] = { foods: [], weight: null };
+            allDayData[dateKey] = { foods: [], weight: null, water: 0, exercises: [] };
         }
+        if (!allDayData[dateKey].water) allDayData[dateKey].water = 0;
+        if (!allDayData[dateKey].exercises) allDayData[dateKey].exercises = [];
 
         allDayData[dateKey].foods.push({
             name: displayName,
@@ -1881,6 +2132,7 @@
     function loadDayData() {
         updateDisplay();
         updateHistoryStats();
+        updateWeeklySummary();
 
         if (getDateKey() === formatDate(new Date())) {
             analyzeYesterdayAndShowTips();
@@ -2044,16 +2296,33 @@
 
         document.getElementById('totalCal').innerText = total;
 
+        // Calculate net calories (food - exercise)
+        const exercises = dayData.exercises || [];
+        const exerciseCal = exercises.reduce((sum, e) => sum + e.calories, 0);
+        const netCal = total - exerciseCal;
+
+        // Update net calories box
+        document.getElementById('foodCalDisplay').textContent = total;
+        document.getElementById('exerciseCalDisplay').textContent = exerciseCal;
+        document.getElementById('netCalDisplay').textContent = netCal;
+
         if (goalDaily > 0) {
-            const pct = Math.round((total / goalDaily) * 100);
-            document.getElementById('goalText').innerText = `${total} / ${goalDaily} cal (${pct}%)`;
+            const pct = Math.round((netCal / goalDaily) * 100);
+            document.getElementById('goalText').innerText = `${netCal} / ${goalDaily} cal (${pct}%)`;
+            document.getElementById('goalComparison').textContent = `Goal: ${goalDaily} cal | ${pct >= 100 ? '⚠️ ' : '✓ '}${pct}%`;
 
             if (pct > 110 && getDateKey() === formatDate(new Date())) {
-                showOverGoalWarning(total - goalDaily);
+                showOverGoalWarning(netCal - goalDaily);
             }
         } else {
             document.getElementById('goalText').innerText = 'Set profile';
+            document.getElementById('goalComparison').textContent = 'Set your goal in Profile';
         }
+
+        // Update water, exercise, and streak displays
+        updateWaterDisplay();
+        updateExerciseDisplay();
+        updateStreakDisplay();
     }
 
     function showOverGoalWarning(overage) {
@@ -2092,6 +2361,7 @@
             document.getElementById('weightDate').value = formatDate(new Date());
         } else if (num === 3) {
             updateHistoryStats();
+            updateWeeklySummary();
         } else if (num === 5) {
             filterRecipes();
         }
@@ -2289,8 +2559,10 @@
 
         const dateKey = getDateKey();
         if (!allDayData[dateKey]) {
-            allDayData[dateKey] = { foods: [], weight: null };
+            allDayData[dateKey] = { foods: [], weight: null, water: 0, exercises: [] };
         }
+        if (!allDayData[dateKey].water) allDayData[dateKey].water = 0;
+        if (!allDayData[dateKey].exercises) allDayData[dateKey].exercises = [];
 
         allDayData[dateKey].foods.push({
             name: recipeName,
@@ -2304,6 +2576,284 @@
 
         showTab(1);
         alert(`Added "${recipeName}" to your food log!`);
+    }
+
+    // ============================================
+    // NEW FEATURES: WATER, EXERCISE, STREAK, CUSTOM FOOD, WEEKLY REPORT
+    // ============================================
+
+    // Water Tracker Functions
+    function toggleWater(index) {
+        const dateKey = getDateKey();
+        if (!allDayData[dateKey]) {
+            allDayData[dateKey] = { foods: [], weight: null, water: 0, exercises: [] };
+        }
+        if (!allDayData[dateKey].water) allDayData[dateKey].water = 0;
+
+        // Toggle up to clicked glass
+        if (allDayData[dateKey].water > index) {
+            allDayData[dateKey].water = index;
+        } else {
+            allDayData[dateKey].water = index + 1;
+        }
+
+        updateWaterDisplay();
+        saveDataToFirebase();
+    }
+
+    function resetWater() {
+        const dateKey = getDateKey();
+        if (allDayData[dateKey]) {
+            allDayData[dateKey].water = 0;
+            updateWaterDisplay();
+            saveDataToFirebase();
+        }
+    }
+
+    function updateWaterDisplay() {
+        const dateKey = getDateKey();
+        const water = allDayData[dateKey] && allDayData[dateKey].water ? allDayData[dateKey].water : 0;
+
+        const glasses = document.querySelectorAll('.water-glass');
+        glasses.forEach((glass, i) => {
+            if (i < water) {
+                glass.textContent = '💧';
+                glass.style.filter = 'grayscale(0%)';
+            } else {
+                glass.textContent = '⚪';
+                glass.style.filter = 'grayscale(100%)';
+            }
+        });
+
+        document.getElementById('waterCount').textContent = `${water}/8`;
+
+        // Water achievement message
+        if (water === 8 && getDateKey() === formatDate(new Date())) {
+            const lastAlert = localStorage.getItem('lastWaterAlert');
+            if (lastAlert !== getDateKey()) {
+                localStorage.setItem('lastWaterAlert', getDateKey());
+                setTimeout(() => alert('🎉 Perfect hydration! 8 glasses complete!'), 500);
+            }
+        }
+    }
+
+    // Exercise Logger Functions
+    function addExercise() {
+        const sel = document.getElementById('exerciseType');
+        if (!sel.value || sel.selectedIndex === 0) {
+            alert('Please select an exercise');
+            return;
+        }
+
+        const exerciseName = sel.options[sel.selectedIndex].text;
+        const caloriesBurned = parseInt(sel.value);
+
+        const dateKey = getDateKey();
+        if (!allDayData[dateKey]) {
+            allDayData[dateKey] = { foods: [], weight: null, water: 0, exercises: [] };
+        }
+        if (!allDayData[dateKey].exercises) allDayData[dateKey].exercises = [];
+
+        allDayData[dateKey].exercises.push({
+            name: exerciseName.split('(')[0].trim(),
+            calories: caloriesBurned,
+            time: new Date().toTimeString().slice(0, 5)
+        });
+
+        updateExerciseDisplay();
+        updateDisplay();
+        saveDataToFirebase();
+
+        sel.selectedIndex = 0;
+        alert(`✅ ${exerciseName} logged!`);
+    }
+
+    function deleteExercise(idx) {
+        const dateKey = getDateKey();
+        if (allDayData[dateKey] && allDayData[dateKey].exercises) {
+            allDayData[dateKey].exercises.splice(idx, 1);
+            updateExerciseDisplay();
+            updateDisplay();
+            saveDataToFirebase();
+        }
+    }
+
+    function updateExerciseDisplay() {
+        const dateKey = getDateKey();
+        const exercises = allDayData[dateKey] && allDayData[dateKey].exercises ? allDayData[dateKey].exercises : [];
+        const container = document.getElementById('exerciseList');
+
+        if (exercises.length === 0) {
+            container.innerHTML = '<div style="text-align:center; color:#999; padding:10px; font-size:13px;">No exercise logged today</div>';
+        } else {
+            container.innerHTML = exercises.map((ex, i) => `
+                <div class="exercise-item">
+                    <div>
+                        <strong>${ex.name}</strong>
+                        <div style="font-size:11px; color:#666;">${ex.time}</div>
+                    </div>
+                    <div>
+                        <span class="exercise-cal">-${ex.calories} cal</span>
+                        <button class="btn-del" onclick="deleteExercise(${i})" style="margin-left:10px; padding:5px 10px; font-size:11px;">×</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+    }
+
+    // Streak Counter Functions
+    function calculateStreak() {
+        const dates = Object.keys(allDayData).sort().reverse();
+        if (dates.length === 0) return 0;
+
+        let streak = 0;
+        const today = formatDate(new Date());
+        let checkDate = new Date();
+
+        // Check if logged today or yesterday (grace period)
+        if (dates[0] !== today) {
+            const yesterday = new Date();
+            yesterday.setDate(yesterday.getDate() - 1);
+            if (dates[0] !== formatDate(yesterday)) {
+                return 0; // Streak broken
+            }
+            checkDate = yesterday;
+        }
+
+        // Count consecutive days
+        for (let i = 0; i < 365; i++) {
+            const dateKey = formatDate(checkDate);
+            if (allDayData[dateKey] && allDayData[dateKey].foods && allDayData[dateKey].foods.length > 0) {
+                streak++;
+                checkDate.setDate(checkDate.getDate() - 1);
+            } else {
+                break;
+            }
+        }
+
+        return streak;
+    }
+
+    function updateStreakDisplay() {
+        const streak = calculateStreak();
+        const badge = document.getElementById('streakBadge');
+        const number = document.getElementById('streakNumber');
+        const text = document.getElementById('streakText');
+
+        if (streak > 0) {
+            badge.style.display = 'block';
+            number.textContent = streak;
+            text.textContent = streak === 1 ? 'Day Streak!' : 'Day Streak!';
+        } else {
+            badge.style.display = 'none';
+        }
+    }
+
+    // Quick Add Custom Food Functions
+    function showQuickAddModal() {
+        document.getElementById('customFoodModal').style.display = 'flex';
+        document.getElementById('customFoodName').value = '';
+        document.getElementById('customFoodCal').value = '';
+        document.getElementById('customFoodName').focus();
+    }
+
+    function closeCustomFoodModal() {
+        document.getElementById('customFoodModal').style.display = 'none';
+    }
+
+    function saveCustomFood() {
+        const name = document.getElementById('customFoodName').value.trim();
+        const cal = parseInt(document.getElementById('customFoodCal').value);
+
+        if (!name) {
+            alert('Please enter food name');
+            return;
+        }
+        if (!cal || cal < 0) {
+            alert('Please enter valid calories');
+            return;
+        }
+
+        const now = new Date();
+        const hour = now.getHours();
+        const mealTime = now.toTimeString().slice(0, 5);
+        let mealType = hour >= 5 && hour < 11 ? 'breakfast' :
+                       hour >= 11 && hour < 15 ? 'lunch' :
+                       hour >= 15 && hour < 21 ? 'dinner' : 'snack';
+
+        const dateKey = getDateKey();
+        if (!allDayData[dateKey]) {
+            allDayData[dateKey] = { foods: [], weight: null, water: 0, exercises: [] };
+        }
+
+        allDayData[dateKey].foods.push({
+            name: name,
+            cal: cal,
+            meal: mealType,
+            time: mealTime
+        });
+
+        updateDisplay();
+        saveDataToFirebase();
+        closeCustomFoodModal();
+
+        alert(`✅ "${name}" added to your log!`);
+    }
+
+    // Weekly Summary Report Functions
+    function updateWeeklySummary() {
+        const today = new Date();
+        const dates = [];
+
+        // Get last 7 days
+        for (let i = 0; i < 7; i++) {
+            const d = new Date(today);
+            d.setDate(d.getDate() - i);
+            dates.push(formatDate(d));
+        }
+
+        let totalCal = 0;
+        let daysWithData = 0;
+        let daysOnTrack = 0;
+        let totalExercise = 0;
+        let totalWater = 0;
+        let daysWithWater = 0;
+
+        dates.forEach(dateKey => {
+            if (allDayData[dateKey]) {
+                const dayData = allDayData[dateKey];
+
+                if (dayData.foods && dayData.foods.length > 0) {
+                    const dayCal = dayData.foods.reduce((sum, f) => sum + f.cal, 0);
+                    const exerciseCal = dayData.exercises ? dayData.exercises.reduce((sum, e) => sum + e.calories, 0) : 0;
+                    const netCal = dayCal - exerciseCal;
+
+                    totalCal += netCal;
+                    daysWithData++;
+
+                    if (goalDaily > 0 && netCal <= goalDaily * 1.1) {
+                        daysOnTrack++;
+                    }
+                }
+
+                if (dayData.exercises && dayData.exercises.length > 0) {
+                    totalExercise += dayData.exercises.reduce((sum, e) => sum + e.calories, 0);
+                }
+
+                if (dayData.water && dayData.water > 0) {
+                    totalWater += dayData.water;
+                    daysWithWater++;
+                }
+            }
+        });
+
+        const avgCal = daysWithData > 0 ? Math.round(totalCal / daysWithData) : 0;
+        const avgWater = daysWithWater > 0 ? Math.round((totalWater / daysWithWater) * 10) / 10 : 0;
+
+        document.getElementById('weeklyAvgCal').textContent = avgCal;
+        document.getElementById('weeklyOnTrack').textContent = `${daysOnTrack}/7`;
+        document.getElementById('weeklyExercise').textContent = `-${totalExercise}`;
+        document.getElementById('weeklyWater').textContent = `${avgWater}/8`;
     }
 
     // Hide suggestions box when clicking outside
