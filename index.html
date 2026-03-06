@@ -7,6 +7,12 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="CalTracker">
     <title>Calorie Tracker Pro</title>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -23,6 +29,10 @@
             margin: 0 auto;
             border-radius: 15px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .login-container {
+            max-width: 400px;
+            margin: 50px auto;
         }
         h1 {
             color: #667eea;
@@ -53,7 +63,7 @@
             margin-bottom: 5px;
             font-size: 14px;
         }
-        select, input[type="text"], input[type="number"], input[type="date"] {
+        select, input[type="text"], input[type="number"], input[type="date"], input[type="email"], input[type="password"] {
             width: 100%;
             padding: 12px;
             border: 2px solid #ddd;
@@ -91,6 +101,15 @@
             flex: 1;
         }
         .btn-nav:active { background-color: #5568d3; }
+        .btn-logout {
+            background-color: #dc3545;
+            color: white;
+            padding: 10px 15px;
+            font-size: 14px;
+            width: auto;
+            margin: 10px auto;
+            display: block;
+        }
         .total-box {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -101,6 +120,13 @@
         }
         .total-box h2 { margin: 0; color: white; font-size: 18px; }
         .total-box .big { font-size: 48px; font-weight: bold; margin: 10px 0; }
+        .user-info {
+            text-align: center;
+            color: #667eea;
+            font-size: 13px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
         .date-nav {
             background-color: #f8f9fa;
             padding: 15px;
@@ -185,28 +211,6 @@
             font-size: 13px;
             font-weight: bold;
         }
-        .tab-buttons {
-            display: flex;
-            gap: 5px;
-            margin: 15px 0;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-        }
-        .tab-btn {
-            padding: 12px 20px;
-            border: 2px solid #667eea;
-            background-color: white;
-            color: #667eea;
-            font-weight: bold;
-            border-radius: 8px;
-            white-space: nowrap;
-            flex-shrink: 0;
-            font-size: 14px;
-        }
-        .tab-btn.active {
-            background-color: #667eea;
-            color: white;
-        }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
         .stats {
@@ -271,12 +275,173 @@
         }
         .trend-up { color: #dc3545; font-weight: bold; }
         .trend-down { color: #28a745; font-weight: bold; }
+        .search-box {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        .favorites-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 8px;
+            margin: 10px 0;
+        }
+        .fav-item {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            position: relative;
+        }
+        .fav-item:active {
+            transform: scale(0.95);
+        }
+        .fav-cal {
+            font-size: 11px;
+            opacity: 0.9;
+            margin-top: 3px;
+        }
+        .fav-remove {
+            position: absolute;
+            top: 3px;
+            right: 3px;
+            background: rgba(220, 53, 69, 0.9);
+            color: white;
+            border: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            font-size: 12px;
+            line-height: 1;
+            cursor: pointer;
+        }
+        .star-btn {
+            background: #ffc107;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 8px 15px;
+            width: 60px;
+            border-radius: 8px;
+        }
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: white;
+            font-size: 18px;
+        }
+        #loginScreen {
+            display: block;
+        }
+        #appScreen {
+            display: none;
+        }
+        .auth-tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 20px;
+        }
+        .auth-tab {
+            flex: 1;
+            padding: 12px;
+            background: #f0f0f0;
+            border: none;
+            border-radius: 8px 8px 0 0;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .auth-tab.active {
+            background: white;
+            color: #667eea;
+        }
     </style>
 </head>
 <body>
 
+<!-- LOADING SCREEN -->
+<div id="loadingScreen" class="loading">
+    <h2>Loading Calorie Tracker...</h2>
+</div>
+
+<!-- LOGIN/REGISTER SCREEN -->
+<div id="loginScreen" style="display:none;">
+    <div class="container login-container">
+        <h1>Calorie Tracker Pro</h1>
+
+        <div class="auth-tabs">
+            <button class="auth-tab active" onclick="switchAuthTab('login')">Login</button>
+            <button class="auth-tab" onclick="switchAuthTab('register')">Register</button>
+        </div>
+
+        <!-- LOGIN FORM -->
+        <div id="loginForm" class="section">
+            <h2>Welcome Back!</h2>
+
+            <div class="row">
+                <label>Email:</label>
+                <input type="email" id="loginEmail" placeholder="your@email.com">
+            </div>
+
+            <div class="row">
+                <label>Password:</label>
+                <input type="password" id="loginPassword" placeholder="Enter password">
+            </div>
+
+            <button class="btn-add" onclick="login()">Login</button>
+
+            <p style="text-align:center; margin-top:15px; font-size:13px; color:#666;">
+                New user? Click Register tab above
+            </p>
+        </div>
+
+        <!-- REGISTER FORM -->
+        <div id="registerForm" class="section" style="display:none;">
+            <h2>Create Account</h2>
+
+            <div class="row">
+                <label>Email:</label>
+                <input type="email" id="registerEmail" placeholder="your@email.com">
+            </div>
+
+            <div class="row">
+                <label>Password:</label>
+                <input type="password" id="registerPassword" placeholder="At least 6 characters">
+            </div>
+
+            <div class="row">
+                <label>Confirm Password:</label>
+                <input type="password" id="registerPasswordConfirm" placeholder="Re-enter password">
+            </div>
+
+            <button class="btn-add" onclick="register()">Create Account</button>
+
+            <p style="text-align:center; margin-top:15px; font-size:13px; color:#666;">
+                Already have account? Click Login tab
+            </p>
+        </div>
+
+        <div style="text-align:center; margin-top:20px; font-size:12px; color:#999;">
+            Your data is private and secure in the cloud
+        </div>
+    </div>
+</div>
+
+<!-- MAIN APP SCREEN -->
+<div id="appScreen" style="display:none;">
 <div class="container">
     <h1>Calorie Tracker Pro</h1>
+
+    <div class="user-info">
+        Logged in as: <span id="userEmail"></span>
+        <button class="btn-logout" onclick="logout()">Logout</button>
+    </div>
 
     <div class="date-nav">
         <div class="date-display" id="currentDate">Today</div>
@@ -296,11 +461,14 @@
         <div id="goalText">No goal set</div>
     </div>
 
-    <div class="tab-buttons">
-        <button class="tab-btn active" onclick="showTab(1)">Food</button>
-        <button class="tab-btn" onclick="showTab(2)">Weight</button>
-        <button class="tab-btn" onclick="showTab(3)">History</button>
-        <button class="tab-btn" onclick="showTab(4)">Profile</button>
+    <div style="margin: 15px 0;">
+        <label style="display:block; font-weight:bold; margin-bottom:5px; font-size:14px;">Navigate To:</label>
+        <select id="tabSelector" onchange="showTabFromDropdown()" style="width:100%; padding:12px; font-size:16px; font-weight:bold; border:2px solid #667eea; border-radius:8px;">
+            <option value="1">📊 Food Tracker</option>
+            <option value="2">⚖️ Weight Tracker</option>
+            <option value="3">📈 History & Stats</option>
+            <option value="4">👤 Profile & Goals</option>
+        </select>
     </div>
 
     <!-- TAB 1: FOOD -->
@@ -322,13 +490,23 @@
             </div>
         </div>
 
+        <div class="section" id="favoritesSection" style="display:none; background-color:#e7f3ff; border-left-color:#2196f3;">
+            <h2 style="color:#1976d2;">⭐ My Favorites (Tap to Add)</h2>
+            <div class="favorites-grid" id="favoritesList"></div>
+        </div>
+
         <div class="section">
             <h2>Add Food</h2>
 
             <div class="row">
+                <label>🔍 Search Food:</label>
+                <input type="text" class="search-box" id="searchBox" placeholder="Type to search (e.g., egg, wrap, beer)..." oninput="filterFoods()">
+            </div>
+
+            <div class="row">
                 <label>Select Food:</label>
-                <select id="foodSel" onchange="previewCal()">
-                    <option value="">-- Select --</option>
+                <select id="foodSel" onchange="previewCal()" size="1">
+                    <option value="">-- Select or search above --</option>
                     <optgroup label="Breakfast">
                         <option value="78" class="animal-product">Boiled Egg</option>
                         <option value="90" class="animal-product">Fried Egg</option>
@@ -338,6 +516,7 @@
                         <option value="102" class="animal-product has-dairy">Butter</option>
                         <option value="43" class="non-halal animal-product meat-product">Bacon</option>
                         <option value="150" class="high-carb has-gluten">Oatmeal</option>
+                        <option value="400" class="high-carb has-gluten">Breakfast Wrap</option>
                     </optgroup>
                     <optgroup label="Dairy">
                         <option value="36" class="animal-product has-dairy">Cottage Cheese 50g</option>
@@ -415,6 +594,12 @@
                         <option value="350" class="high-carb has-gluten has-dairy meat-product">Pepperoni Pizza</option>
                         <option value="380" class="high-carb has-gluten has-dairy meat-product">Meaty Pizza</option>
                     </optgroup>
+                    <optgroup label="Wraps & Sandwiches">
+                        <option value="400" class="high-carb has-gluten">Chicken Wrap</option>
+                        <option value="450" class="high-carb has-gluten">Beef Wrap</option>
+                        <option value="350" class="high-carb has-gluten">Veggie Wrap</option>
+                        <option value="380" class="high-carb has-gluten meat-product">Club Sandwich</option>
+                    </optgroup>
                     <optgroup label="Protein Shakes">
                         <option value="120" class="animal-product has-dairy">Whey Protein</option>
                         <option value="110">Plant Protein</option>
@@ -427,39 +612,30 @@
                         <option value="300" class="high-carb has-gluten meat-product">Cheeseburger</option>
                         <option value="510" class="high-carb has-gluten meat-product">McChicken</option>
                         <option value="380" class="high-carb">Medium Fries</option>
-                        <option value="500" class="high-carb has-gluten meat-product">6pc McNuggets</option>
                     </optgroup>
                     <optgroup label="Burger King">
                         <option value="677" class="high-carb has-gluten meat-product">Whopper</option>
                         <option value="350" class="high-carb has-gluten meat-product">Cheeseburger BK</option>
-                        <option value="660" class="high-carb has-gluten meat-product">Chicken Royale</option>
-                        <option value="340" class="high-carb">Fries BK</option>
                     </optgroup>
                     <optgroup label="KFC">
                         <option value="320" class="animal-product meat-product">Original Recipe</option>
                         <option value="490" class="high-carb has-gluten meat-product">Zinger Burger</option>
-                        <option value="290" class="high-carb">KFC Chips</option>
                     </optgroup>
                     <optgroup label="Nando's">
                         <option value="280" class="animal-product meat-product">1/4 Chicken</option>
                         <option value="450" class="animal-product meat-product">1/2 Chicken</option>
-                        <option value="215" class="animal-product meat-product">Breast Fillet</option>
                         <option value="510" class="high-carb has-gluten meat-product">Chicken Burger</option>
                         <option value="390" class="high-carb">Peri-Peri Chips</option>
-                        <option value="280" class="high-carb has-gluten">Garlic Bread</option>
                     </optgroup>
                     <optgroup label="Steers">
                         <option value="650" class="high-carb has-gluten meat-product">King Steer</option>
-                        <option value="580" class="high-carb has-gluten meat-product">Big Steer</option>
                         <option value="750" class="high-carb has-gluten meat-product">Rib Burger</option>
                         <option value="520" class="high-carb has-gluten meat-product">Wacky Wednesday</option>
-                        <option value="380" class="high-carb">Chips</option>
                     </optgroup>
                     <optgroup label="Snacks">
                         <option value="235" class="high-sugar high-carb">Chocolate Bar</option>
                         <option value="59" class="high-sugar high-carb has-gluten">Cookie</option>
                         <option value="152" class="high-carb">Potato Chips</option>
-                        <option value="200">Mixed Nuts</option>
                     </optgroup>
                 </select>
             </div>
@@ -471,7 +647,10 @@
 
             <div class="row">
                 <label>Calories:</label>
-                <input type="text" id="preview" value="0 cal" readonly style="font-weight:bold; color:#667eea; background:#f0f0f0;">
+                <div style="display:flex; gap:5px;">
+                    <input type="text" id="preview" value="0 cal" readonly style="font-weight:bold; color:#667eea; background:#f0f0f0; flex:1;">
+                    <button class="star-btn" id="starBtn" onclick="toggleFavorite()">☆</button>
+                </div>
             </div>
 
             <button class="btn-add" onclick="addFood()">Add to Log</button>
@@ -492,23 +671,19 @@
     <div id="tab2" class="tab-content">
         <div class="section">
             <h2>Log Weight</h2>
-
             <div class="row">
                 <label>Date:</label>
                 <input type="date" id="weightDate">
             </div>
-
             <div class="row">
                 <label>Weight (kg):</label>
                 <input type="number" id="weightInput" placeholder="75.5" step="0.1">
             </div>
-
             <button class="btn-add" onclick="addWeight()">Log Weight</button>
         </div>
 
         <div class="section">
             <h2>Weight Stats</h2>
-
             <div class="stats">
                 <div class="stat-box">
                     <div class="stat-label">Current</div>
@@ -530,19 +705,10 @@
 
             <table class="history-table">
                 <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Weight</th>
-                        <th>Change</th>
-                        <th>Action</th>
-                    </tr>
+                    <tr><th>Date</th><th>Weight</th><th>Change</th></tr>
                 </thead>
                 <tbody id="weightHistoryTable">
-                    <tr>
-                        <td colspan="4" style="text-align:center; color:#999; padding:15px;">
-                            No entries yet
-                        </td>
-                    </tr>
+                    <tr><td colspan="3" style="text-align:center; color:#999; padding:15px;">No entries</td></tr>
                 </tbody>
             </table>
         </div>
@@ -552,7 +718,6 @@
     <div id="tab3" class="tab-content">
         <div class="section">
             <h2>Calorie History</h2>
-
             <div class="stats">
                 <div class="stat-box">
                     <div class="stat-label">7-Day Avg</div>
@@ -570,22 +735,12 @@
 
             <table class="history-table">
                 <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Calories</th>
-                        <th>Weight</th>
-                    </tr>
+                    <tr><th>Date</th><th>Calories</th><th>Weight</th></tr>
                 </thead>
                 <tbody id="historyTable">
-                    <tr>
-                        <td colspan="3" style="text-align:center; color:#999; padding:15px;">
-                            No history yet
-                        </td>
-                    </tr>
+                    <tr><td colspan="3" style="text-align:center; color:#999; padding:15px;">No history</td></tr>
                 </tbody>
             </table>
-
-            <button class="btn-clear" onclick="clearAllHistory()">Clear All History</button>
         </div>
     </div>
 
@@ -593,7 +748,6 @@
     <div id="tab4" class="tab-content">
         <div class="section">
             <h2>Your Profile</h2>
-
             <div class="row">
                 <label>Gender:</label>
                 <select id="gender">
@@ -601,17 +755,14 @@
                     <option value="female">Female</option>
                 </select>
             </div>
-
             <div class="row">
                 <label>Age:</label>
                 <input type="number" id="age" placeholder="30">
             </div>
-
             <div class="row">
                 <label>Height (cm):</label>
                 <input type="number" id="height" placeholder="175">
             </div>
-
             <div class="row">
                 <label>Activity:</label>
                 <select id="activity">
@@ -622,7 +773,6 @@
                     <option value="1.9">Extra active</option>
                 </select>
             </div>
-
             <div class="row">
                 <label>Goal:</label>
                 <select id="goal">
@@ -657,14 +807,199 @@
         </div>
     </div>
 </div>
+</div>
 
 <script>
+    // ============================================
+    // FIREBASE CONFIGURATION
+    // ============================================
+    // PASTE YOUR FIREBASE CONFIG HERE (from Firebase Console Step 5)
+    const firebaseConfig = {
+        apiKey: "AIzaSyCRcR_avSGTnn4G69FUk8wcshrVHZNrj5o",
+        authDomain: "calorie-app-67270.firebaseapp.com",
+        projectId: "calorie-app-67270",
+        storageBucket: "calorie-app-67270.firebasestorage.app",
+        messagingSenderId: "768480441035",
+        appId: "1:768480441035:web:ed34093e220ace6c13614e"
+    };
+
+    // Initialize Firebase
+    let app, auth, db, currentUser;
+
+    try {
+        app = firebase.initializeApp(firebaseConfig);
+        auth = firebase.auth();
+        db = firebase.firestore();
+        console.log('Firebase initialized');
+    } catch(error) {
+        console.error('Firebase init error:', error);
+        document.getElementById('loadingScreen').innerHTML = `
+            <div class="container" style="background:white; padding:30px; border-radius:15px;">
+                <h2 style="color:#dc3545;">⚠️ Setup Required</h2>
+                <p style="margin:20px 0;">Please follow FIREBASE-SETUP-INSTRUCTIONS.txt to configure Firebase.</p>
+                <p style="font-size:13px; color:#666;">You need to add your Firebase configuration to this file.</p>
+            </div>
+        `;
+    }
+
+    // ============================================
+    // APP STATE
+    // ============================================
     let allDayData = {};
     let weightHistory = [];
     let goalDaily = 0;
     let currentDietMode = 'none';
     let currentViewDate = new Date();
+    let favorites = [];
 
+    // ============================================
+    // AUTHENTICATION FUNCTIONS
+    // ============================================
+    function switchAuthTab(tab) {
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
+        const authTabs = document.querySelectorAll('.auth-tab');
+
+        if (tab === 'login') {
+            loginForm.style.display = 'block';
+            registerForm.style.display = 'none';
+            authTabs[0].classList.add('active');
+            authTabs[1].classList.remove('active');
+        } else {
+            loginForm.style.display = 'none';
+            registerForm.style.display = 'block';
+            authTabs[0].classList.remove('active');
+            authTabs[1].classList.add('active');
+        }
+    }
+
+    function register() {
+        const email = document.getElementById('registerEmail').value.trim();
+        const password = document.getElementById('registerPassword').value;
+        const confirmPassword = document.getElementById('registerPasswordConfirm').value;
+
+        if (!email || !password) {
+            alert('Please fill in all fields');
+            return;
+        }
+
+        if (password.length < 6) {
+            alert('Password must be at least 6 characters');
+            return;
+        }
+
+        if (password !== confirmPassword) {
+            alert('Passwords do not match');
+            return;
+        }
+
+        auth.createUserWithEmailAndPassword(email, password)
+            .then((userCredential) => {
+                alert('Account created successfully! Welcome!');
+                // Will trigger onAuthStateChanged
+            })
+            .catch((error) => {
+                alert('Registration failed: ' + error.message);
+            });
+    }
+
+    function login() {
+        const email = document.getElementById('loginEmail').value.trim();
+        const password = document.getElementById('loginPassword').value;
+
+        if (!email || !password) {
+            alert('Please fill in all fields');
+            return;
+        }
+
+        auth.signInWithEmailAndPassword(email, password)
+            .then((userCredential) => {
+                // Will trigger onAuthStateChanged
+            })
+            .catch((error) => {
+                alert('Login failed: ' + error.message);
+            });
+    }
+
+    function logout() {
+        if (confirm('Are you sure you want to logout?')) {
+            auth.signOut();
+        }
+    }
+
+    // Listen for auth state changes
+    auth.onAuthStateChanged((user) => {
+        document.getElementById('loadingScreen').style.display = 'none';
+
+        if (user) {
+            // User is logged in
+            currentUser = user;
+            document.getElementById('userEmail').textContent = user.email;
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('appScreen').style.display = 'block';
+            loadDataFromFirebase();
+        } else {
+            // User is logged out
+            currentUser = null;
+            document.getElementById('loginScreen').style.display = 'block';
+            document.getElementById('appScreen').style.display = 'none';
+        }
+    });
+
+    // ============================================
+    // FIREBASE DATA FUNCTIONS
+    // ============================================
+    function saveDataToFirebase() {
+        if (!currentUser) return;
+
+        const data = {
+            allDayData: allDayData,
+            weightHistory: weightHistory,
+            goal: goalDaily,
+            dietMode: currentDietMode,
+            favorites: favorites,
+            lastUpdated: new Date().toISOString()
+        };
+
+        db.collection('users').doc(currentUser.uid).set(data, { merge: true })
+            .then(() => console.log('Data saved to cloud'))
+            .catch((error) => console.error('Save error:', error));
+    }
+
+    function loadDataFromFirebase() {
+        if (!currentUser) return;
+
+        db.collection('users').doc(currentUser.uid).get()
+            .then((doc) => {
+                if (doc.exists) {
+                    const data = doc.data();
+                    allDayData = data.allDayData || {};
+                    weightHistory = data.weightHistory || [];
+                    goalDaily = data.goal || 0;
+                    currentDietMode = data.dietMode || 'none';
+                    favorites = data.favorites || [];
+
+                    document.getElementById('dietMode').value = currentDietMode;
+                    applyDietMode();
+                    updateFavoritesList();
+                    updateDisplay();
+                    updateWeightDisplay();
+                    updateDateDisplay();
+                    document.getElementById('weightDate').value = formatDate(new Date());
+                    analyzeYesterdayAndShowTips();
+                } else {
+                    // New user, no data yet
+                    console.log('New user - no data');
+                }
+            })
+            .catch((error) => {
+                console.error('Load error:', error);
+            });
+    }
+
+    // ============================================
+    // APP FUNCTIONS (Same as before but call Firebase save)
+    // ============================================
     function formatDate(date) {
         return date.toISOString().split('T')[0];
     }
@@ -710,7 +1045,7 @@
     function changeDietMode() {
         currentDietMode = document.getElementById('dietMode').value;
         applyDietMode();
-        saveData();
+        saveDataToFirebase();
     }
 
     function applyDietMode() {
@@ -770,23 +1105,141 @@
         previewCal();
     }
 
+    function filterFoods() {
+        const searchTerm = document.getElementById('searchBox').value.toLowerCase();
+        const select = document.getElementById('foodSel');
+        const options = select.getElementsByTagName('option');
+
+        for (let i = 0; i < options.length; i++) {
+            const option = options[i];
+            const text = option.text.toLowerCase();
+
+            if (text.includes(searchTerm) || searchTerm === '') {
+                option.style.display = '';
+            } else {
+                option.style.display = 'none';
+            }
+        }
+
+        const optgroups = select.getElementsByTagName('optgroup');
+        for (let i = 0; i < optgroups.length; i++) {
+            const group = optgroups[i];
+            const groupOptions = group.getElementsByTagName('option');
+            let hasVisible = false;
+
+            for (let j = 0; j < groupOptions.length; j++) {
+                if (groupOptions[j].style.display !== 'none' && !groupOptions[j].disabled) {
+                    hasVisible = true;
+                    break;
+                }
+            }
+
+            group.style.display = hasVisible ? '' : 'none';
+        }
+    }
+
     function previewCal() {
         const sel = document.getElementById('foodSel');
         const qty = parseFloat(document.getElementById('qty').value) || 1;
 
         if (!sel.value || sel.selectedIndex === 0) {
             document.getElementById('preview').value = '0 cal';
+            document.getElementById('starBtn').textContent = '☆';
             return;
         }
 
         const calValue = parseInt(sel.value);
         if (isNaN(calValue)) {
             document.getElementById('preview').value = '0 cal';
+            document.getElementById('starBtn').textContent = '☆';
             return;
         }
 
         const total = calValue * qty;
         document.getElementById('preview').value = Math.round(total) + ' cal';
+
+        const foodName = sel.options[sel.selectedIndex].text;
+        const isFavorite = favorites.some(f => f.name === foodName);
+        document.getElementById('starBtn').textContent = isFavorite ? '★' : '☆';
+    }
+
+    function toggleFavorite() {
+        const sel = document.getElementById('foodSel');
+
+        if (!sel.value || sel.selectedIndex === 0) {
+            alert('Please select a food first');
+            return;
+        }
+
+        const foodName = sel.options[sel.selectedIndex].text;
+        const foodCal = parseInt(sel.value);
+
+        const existingIndex = favorites.findIndex(f => f.name === foodName);
+
+        if (existingIndex >= 0) {
+            favorites.splice(existingIndex, 1);
+            document.getElementById('starBtn').textContent = '☆';
+        } else {
+            favorites.push({ name: foodName, cal: foodCal });
+            document.getElementById('starBtn').textContent = '★';
+        }
+
+        updateFavoritesList();
+        saveDataToFirebase();
+    }
+
+    function updateFavoritesList() {
+        const favSection = document.getElementById('favoritesSection');
+        const favList = document.getElementById('favoritesList');
+
+        if (favorites.length === 0) {
+            favSection.style.display = 'none';
+            return;
+        }
+
+        favSection.style.display = 'block';
+
+        favList.innerHTML = favorites.map(fav => `
+            <div class="fav-item" onclick="addFromFavorite('${fav.name.replace(/'/g, "\\'")}', ${fav.cal})">
+                <button class="fav-remove" onclick="event.stopPropagation(); removeFavorite('${fav.name.replace(/'/g, "\\'")}')">×</button>
+                <div>${fav.name}</div>
+                <div class="fav-cal">${fav.cal} cal</div>
+            </div>
+        `).join('');
+    }
+
+    function addFromFavorite(name, cal) {
+        const now = new Date();
+        const hour = now.getHours();
+        const mealTime = now.toTimeString().slice(0, 5);
+        let mealType = hour >= 5 && hour < 11 ? 'breakfast' :
+                       hour >= 11 && hour < 15 ? 'lunch' :
+                       hour >= 15 && hour < 21 ? 'dinner' : 'snack';
+
+        const dateKey = getDateKey();
+        if (!allDayData[dateKey]) {
+            allDayData[dateKey] = { foods: [], weight: null };
+        }
+
+        allDayData[dateKey].foods.push({
+            name: name,
+            cal: cal,
+            meal: mealType,
+            time: mealTime
+        });
+
+        updateDisplay();
+        saveDataToFirebase();
+
+        if (getDateKey() === formatDate(new Date())) {
+            checkTodayWarnings(name);
+        }
+    }
+
+    function removeFavorite(name) {
+        favorites = favorites.filter(f => f.name !== name);
+        updateFavoritesList();
+        saveDataToFirebase();
     }
 
     function addFood() {
@@ -832,7 +1285,7 @@
         });
 
         updateDisplay();
-        saveData();
+        saveDataToFirebase();
 
         if (getDateKey() === formatDate(new Date())) {
             checkTodayWarnings(displayName);
@@ -841,6 +1294,8 @@
         sel.selectedIndex = 0;
         document.getElementById('qty').value = 1;
         document.getElementById('preview').value = '0 cal';
+        document.getElementById('searchBox').value = '';
+        filterFoods();
     }
 
     function delFood(idx) {
@@ -848,7 +1303,7 @@
         if (allDayData[dateKey] && allDayData[dateKey].foods) {
             allDayData[dateKey].foods.splice(idx, 1);
             updateDisplay();
-            saveData();
+            saveDataToFirebase();
         }
     }
 
@@ -859,7 +1314,7 @@
         if (confirm('Clear all food for this day?')) {
             allDayData[dateKey].foods = [];
             updateDisplay();
-            saveData();
+            saveDataToFirebase();
         }
     }
 
@@ -879,12 +1334,9 @@
         const foods = allDayData[dateKey] ? allDayData[dateKey].foods : [];
 
         let beerToday = 0;
-        let sodaToday = 0;
-
         foods.forEach(food => {
             const name = food.name.toLowerCase();
             if (name.includes('beer') || name.includes('lager')) beerToday++;
-            if (name.includes('coca-cola') || name.includes('pepsi')) sodaToday++;
         });
 
         if ((justAdded.toLowerCase().includes('beer') || justAdded.toLowerCase().includes('lager')) && beerToday >= 3) {
@@ -894,7 +1346,7 @@
         if (justAdded.toLowerCase().includes('water')) {
             const waterCount = foods.filter(f => f.name.toLowerCase().includes('water')).length;
             if (waterCount === 8) {
-                alert(`🎉 8 glasses of water! Perfect hydration!`);
+                alert(`🎉 8 glasses of water! Perfect!`);
             }
         }
     }
@@ -928,7 +1380,7 @@
         if (beerCount >= 10) {
             tips.push({
                 type: 'warning',
-                message: `🚨 You had ${beerCount} beers yesterday (${beerCount * 150} cal)! DO NOT repeat this today!`
+                message: `🚨 You had ${beerCount} beers yesterday! DO NOT repeat this today!`
             });
         } else if (beerCount >= 5) {
             tips.push({
@@ -940,21 +1392,21 @@
         if (sodaCount >= 3) {
             tips.push({
                 type: 'warning',
-                message: `⚠️ ${sodaCount} sodas yesterday (${sodaCount * 140} cal of sugar!). Switch to Coke Zero!`
+                message: `⚠️ ${sodaCount} sodas yesterday! Switch to Coke Zero today!`
             });
         }
 
         if (waterCount >= 8) {
             tips.push({
                 type: 'success',
-                message: `🌟 ${waterCount} glasses of water yesterday! Perfect hydration!`
+                message: `🌟 ${waterCount} glasses of water yesterday! Perfect!`
             });
         }
 
         if (goalDaily > 0 && totalCal <= goalDaily) {
             tips.push({
                 type: 'success',
-                message: `✅ Great job! You stayed within your goal yesterday!`
+                message: `✅ Great job! Stayed within goal yesterday!`
             });
         }
 
@@ -963,7 +1415,7 @@
             coachBox.innerHTML = tips.map(tip => {
                 const boxClass = tip.type === 'warning' ? 'warning-box' :
                                 tip.type === 'success' ? 'success-box' : 'alert-box';
-                return `<div class="${boxClass}"><strong>Health Coach:</strong> ${tip.message}</div>`;
+                return `<div class="${boxClass}"><strong>Coach:</strong> ${tip.message}</div>`;
             }).join('');
             coachBox.style.display = 'block';
         }
@@ -1011,7 +1463,7 @@
                     meal.items.forEach(food => {
                         html += `
                             <div class="food-row">
-                                <div style="flex:1;">
+                                <div>
                                     ${food.time ? `<span class="food-time">${food.time}</span>` : ''}
                                     <span class="food-name">${food.name}</span>
                                 </div>
@@ -1040,7 +1492,7 @@
                 showOverGoalWarning(total - goalDaily);
             }
         } else {
-            document.getElementById('goalText').innerText = 'Set profile to see goal';
+            document.getElementById('goalText').innerText = 'Set profile';
         }
     }
 
@@ -1048,13 +1500,11 @@
         const coachBox = document.getElementById('healthCoach');
         const html = `
             <div class="warning-box">
-                <strong>⚠️ OVER GOAL!</strong> You're ${overage} calories over!<br><br>
-                <strong>Your goal is to LOSE WEIGHT.</strong><br><br>
-                <strong>What to do NOW:</strong><br>
-                • Go for a 45-min walk (burns ~200 cal)<br>
+                <strong>⚠️ OVER GOAL!</strong> You're ${overage} cal over!<br><br>
+                <strong>What to do:</strong><br>
+                • Walk 45 min (burns ~200 cal)<br>
                 • Drink 2 glasses of water<br>
-                • Only eat vegetables if hungry<br>
-                • STOP eating for today<br>
+                • STOP eating today<br>
                 • Plan better tomorrow!
             </div>
         `;
@@ -1067,12 +1517,15 @@
         coachBox.style.display = 'block';
     }
 
+    function showTabFromDropdown() {
+        const selectedTab = document.getElementById('tabSelector').value;
+        showTab(parseInt(selectedTab));
+    }
+
     function showTab(num) {
         document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-
         document.getElementById('tab' + num).classList.add('active');
-        document.querySelectorAll('.tab-btn')[num - 1].classList.add('active');
+        document.getElementById('tabSelector').value = num.toString();
 
         if (num === 2) {
             updateWeightDisplay();
@@ -1093,7 +1546,7 @@
                        parseFloat(prompt('Enter your current weight (kg):'));
 
         if (!age || !weight || !height) {
-            alert('Please fill all fields and log weight first!');
+            alert('Fill all fields and log weight first!');
             return;
         }
 
@@ -1113,7 +1566,7 @@
         document.getElementById('results').style.display = 'block';
 
         updateDisplay();
-        saveData();
+        saveDataToFirebase();
         alert('Profile saved!');
     }
 
@@ -1135,7 +1588,7 @@
         }
         allDayData[dateInput].weight = weight;
 
-        saveData();
+        saveDataToFirebase();
         updateWeightDisplay();
         alert('Weight logged!');
 
@@ -1149,7 +1602,7 @@
             if (allDayData[entry.date]) {
                 allDayData[entry.date].weight = null;
             }
-            saveData();
+            saveDataToFirebase();
             updateWeightDisplay();
         }
     }
@@ -1158,7 +1611,7 @@
         const table = document.getElementById('weightHistoryTable');
 
         if (weightHistory.length === 0) {
-            table.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#999; padding:15px;">No entries</td></tr>';
+            table.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#999; padding:15px;">No entries</td></tr>';
             document.getElementById('currentWeight').textContent = '--';
             document.getElementById('startWeight').textContent = '--';
             document.getElementById('weightChange').textContent = '--';
@@ -1178,7 +1631,7 @@
         changeElem.textContent = (change >= 0 ? '+' : '') + change.toFixed(1);
         changeElem.className = 'stat-value ' + (change > 0 ? 'trend-up' : change < 0 ? 'trend-down' : '');
 
-        table.innerHTML = weightHistory.map((entry, i) => {
+        table.innerHTML = weightHistory.slice(0, 10).map((entry, i) => {
             const prevWeight = i < weightHistory.length - 1 ? weightHistory[i + 1].weight : entry.weight;
             const diff = entry.weight - prevWeight;
             const diffStr = diff === 0 ? '--' : (diff > 0 ? '+' + diff.toFixed(1) : diff.toFixed(1));
@@ -1189,7 +1642,6 @@
                     <td>${entry.date}</td>
                     <td>${entry.weight.toFixed(1)} kg</td>
                     <td><span class="${trendClass}">${diffStr}</span></td>
-                    <td><button class="btn-del" onclick="deleteWeight(${i})">X</button></td>
                 </tr>
             `;
         }).join('');
@@ -1233,7 +1685,7 @@
         document.getElementById('avg30').textContent = count30 > 0 ? Math.round(total30 / count30) : '0';
         document.getElementById('daysLogged').textContent = dates.length;
 
-        table.innerHTML = dates.slice(0, 30).map(dateKey => {
+        table.innerHTML = dates.slice(0, 20).map(dateKey => {
             const dayData = allDayData[dateKey];
             const foods = dayData.foods || [];
             const calories = foods.reduce((sum, f) => sum + f.cal, 0);
@@ -1260,47 +1712,10 @@
         if (Object.keys(allDayData).length === 0) return;
         if (confirm('Delete ALL history?')) {
             allDayData = {};
-            saveData();
+            saveDataToFirebase();
             updateHistoryStats();
         }
     }
-
-    function saveData() {
-        try {
-            const data = {
-                allDayData: allDayData,
-                weightHistory: weightHistory,
-                goal: goalDaily,
-                dietMode: currentDietMode
-            };
-            localStorage.setItem('calTrackerPro', JSON.stringify(data));
-        } catch(e) {}
-    }
-
-    function loadData() {
-        try {
-            const saved = localStorage.getItem('calTrackerPro');
-            if (saved) {
-                const data = JSON.parse(saved);
-                allDayData = data.allDayData || {};
-                weightHistory = data.weightHistory || [];
-                goalDaily = data.goal || 0;
-                currentDietMode = data.dietMode || 'none';
-
-                document.getElementById('dietMode').value = currentDietMode;
-                applyDietMode();
-                updateDisplay();
-                updateWeightDisplay();
-            }
-        } catch(e) {}
-    }
-
-    window.onload = () => {
-        loadData();
-        updateDateDisplay();
-        document.getElementById('weightDate').value = formatDate(new Date());
-        analyzeYesterdayAndShowTips();
-    };
 </script>
 
 </body>
