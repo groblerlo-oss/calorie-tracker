@@ -283,6 +283,38 @@
             font-size: 16px;
             margin-bottom: 10px;
         }
+        .suggestions-container {
+            position: relative;
+        }
+        .suggestions-box {
+            position: absolute;
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            max-height: 300px;
+            overflow-y: auto;
+            width: 100%;
+            z-index: 1000;
+            display: none;
+        }
+        .suggestion-item {
+            padding: 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 14px;
+        }
+        .suggestion-item:hover {
+            background-color: #f0f0f0;
+        }
+        .suggestion-item:last-child {
+            border-bottom: none;
+        }
+        .suggestion-cal {
+            color: #667eea;
+            font-weight: bold;
+            float: right;
+        }
         .favorites-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
@@ -299,6 +331,12 @@
             font-weight: bold;
             cursor: pointer;
             position: relative;
+        }
+        .recipe-item.recipe-hidden {
+            display: none !important;
+        }
+        .recipe-section.recipe-section-hidden {
+            display: none !important;
         }
         .fav-item:active {
             transform: scale(0.95);
@@ -396,8 +434,29 @@
 
             <button class="btn-add" onclick="login()">Login</button>
 
-            <p style="text-align:center; margin-top:15px; font-size:13px; color:#666;">
+            <p style="text-align:center; margin-top:15px; font-size:13px;">
+                <a href="javascript:void(0)" onclick="showPasswordReset()" style="color:#667eea; text-decoration:none; font-weight:bold;">Forgot Password?</a>
+            </p>
+
+            <p style="text-align:center; margin-top:5px; font-size:13px; color:#666;">
                 New user? Click Register tab above
+            </p>
+        </div>
+
+        <!-- PASSWORD RESET FORM -->
+        <div id="resetForm" class="section" style="display:none;">
+            <h2>Reset Password</h2>
+            <p style="color:#666; font-size:13px; margin-bottom:15px;">Enter your email to receive a password reset link</p>
+
+            <div class="row">
+                <label>Email:</label>
+                <input type="email" id="resetEmail" placeholder="your@email.com">
+            </div>
+
+            <button class="btn-add" onclick="resetPassword()">Send Reset Link</button>
+
+            <p style="text-align:center; margin-top:15px; font-size:13px;">
+                <a href="javascript:void(0)" onclick="switchAuthTab('login')" style="color:#667eea; text-decoration:none; font-weight:bold;">Back to Login</a>
             </p>
         </div>
 
@@ -468,6 +527,7 @@
             <option value="2">⚖️ Weight Tracker</option>
             <option value="3">📈 History & Stats</option>
             <option value="4">👤 Profile & Goals</option>
+            <option value="5">📖 Recipe Book</option>
         </select>
     </div>
 
@@ -500,7 +560,10 @@
 
             <div class="row">
                 <label>🔍 Search Food:</label>
-                <input type="text" class="search-box" id="searchBox" placeholder="Type to search (e.g., egg, wrap, beer)..." oninput="filterFoods()">
+                <div class="suggestions-container">
+                    <input type="text" class="search-box" id="searchBox" placeholder="Type to search (e.g., egg, wrap, beer)..." oninput="filterFoods()">
+                    <div id="suggestionsBox" class="suggestions-box"></div>
+                </div>
             </div>
 
             <div class="row">
@@ -805,6 +868,242 @@
                 </div>
             </div>
         </div>
+
+        <div class="section" style="background-color:#fff3cd; border-left-color:#ffc107;">
+            <h2 style="color:#856404;">🔐 Account Settings</h2>
+
+            <div class="row">
+                <label style="color:#856404;">Change Password:</label>
+                <input type="password" id="newPassword" placeholder="New password (min 6 chars)">
+            </div>
+
+            <div class="row">
+                <label style="color:#856404;">Confirm Password:</label>
+                <input type="password" id="confirmPassword" placeholder="Confirm new password">
+            </div>
+
+            <button class="btn-save" onclick="changePassword()">Update Password</button>
+        </div>
+    </div>
+
+    <!-- TAB 5: RECIPE BOOK -->
+    <div id="tab5" class="tab-content">
+        <div class="section" style="background-color:#d4edda; border-left-color:#28a745;">
+            <h2 style="color:#155724;">📖 Healthy Recipe Book</h2>
+            <p style="color:#155724; font-size:13px; margin-bottom:15px;">Tap any recipe to add it to your food log! <span id="recipeFilterInfo" style="font-weight:bold;"></span></p>
+        </div>
+
+        <div class="section recipe-section" style="background-color:#fff3cd; border-left-color:#ffc107;">
+            <h2 style="color:#856404;">🔥 Weight Loss Meals (Under 500 cal)</h2>
+
+            <div class="recipe-item animal-product has-dairy has-gluten" style="background:white; padding:15px; border-radius:8px; margin:10px 0; border:2px solid #ddd;">
+                <h3 style="color:#28a745; font-size:16px; margin-bottom:8px;">Protein Breakfast Bowl</h3>
+                <div style="color:#28a745; font-weight:bold; margin:5px 0;">380 calories</div>
+                <ul style="line-height:1.8; font-size:13px; margin:10px 0 10px 20px;">
+                    <li>2x Boiled Eggs (156 cal)</li>
+                    <li>50g Cottage Cheese (36 cal)</li>
+                    <li>1x Wheat Toast (69 cal)</li>
+                    <li>1/2 Avocado (120 cal)</li>
+                </ul>
+                <button class="btn-add" onclick="addRecipe('Protein Breakfast Bowl', 380)">Add to My Log</button>
+            </div>
+
+            <div class="recipe-item animal-product meat-product high-carb" style="background:white; padding:15px; border-radius:8px; margin:10px 0; border:2px solid #ddd;">
+                <h3 style="color:#28a745; font-size:16px; margin-bottom:8px;">Grilled Chicken & Veggies</h3>
+                <div style="color:#28a745; font-weight:bold; margin:5px 0;">420 calories</div>
+                <ul style="line-height:1.8; font-size:13px; margin:10px 0 10px 20px;">
+                    <li>150g Chicken Breast (248 cal)</li>
+                    <li>1 cup Broccoli (55 cal)</li>
+                    <li>1 cup Spinach (7 cal)</li>
+                    <li>1 Baked Potato (161 cal)</li>
+                </ul>
+                <button class="btn-add" onclick="addRecipe('Grilled Chicken & Veggies', 420)">Add to My Log</button>
+            </div>
+
+            <div class="recipe-item animal-product meat-product has-gluten" style="background:white; padding:15px; border-radius:8px; margin:10px 0; border:2px solid #ddd;">
+                <h3 style="color:#28a745; font-size:16px; margin-bottom:8px;">Tuna Salad Wrap</h3>
+                <div style="color:#28a745; font-weight:bold; margin:5px 0;">350 calories</div>
+                <ul style="line-height:1.8; font-size:13px; margin:10px 0 10px 20px;">
+                    <li>1x Veggie Wrap with tuna</li>
+                    <li>Lettuce, tomato, cucumber</li>
+                </ul>
+                <button class="btn-add" onclick="addRecipe('Tuna Salad Wrap', 350)">Add to My Log</button>
+            </div>
+
+            <div class="recipe-item animal-product meat-product high-carb" style="background:white; padding:15px; border-radius:8px; margin:10px 0; border:2px solid #ddd;">
+                <h3 style="color:#28a745; font-size:16px; margin-bottom:8px;">Nando's Quarter Chicken</h3>
+                <div style="color:#28a745; font-weight:bold; margin:5px 0;">460 calories</div>
+                <ul style="line-height:1.8; font-size:13px; margin:10px 0 10px 20px;">
+                    <li>1/4 Chicken (280 cal)</li>
+                    <li>Peri-Peri Rice (180 cal)</li>
+                    <li>Skip the garlic bread!</li>
+                </ul>
+                <button class="btn-add" onclick="addRecipe('Nando\'s Quarter Chicken', 460)">Add to My Log</button>
+            </div>
+
+            <div class="recipe-item vegan-friendly" style="background:white; padding:15px; border-radius:8px; margin:10px 0; border:2px solid #ddd;">
+                <h3 style="color:#28a745; font-size:16px; margin-bottom:8px;">Buddha Bowl (Vegan)</h3>
+                <div style="color:#28a745; font-weight:bold; margin:5px 0;">380 calories</div>
+                <ul style="line-height:1.8; font-size:13px; margin:10px 0 10px 20px;">
+                    <li>Chickpeas (227 cal)</li>
+                    <li>Quinoa (120 cal)</li>
+                    <li>Mixed vegetables (33 cal)</li>
+                </ul>
+                <button class="btn-add" onclick="addRecipe('Buddha Bowl (Vegan)', 380)">Add to My Log</button>
+            </div>
+
+            <div class="recipe-item vegan-friendly high-carb" style="background:white; padding:15px; border-radius:8px; margin:10px 0; border:2px solid #ddd;">
+                <h3 style="color:#28a745; font-size:16px; margin-bottom:8px;">Lentil Curry (Vegan)</h3>
+                <div style="color:#28a745; font-weight:bold; margin:5px 0;">320 calories</div>
+                <ul style="line-height:1.8; font-size:13px; margin:10px 0 10px 20px;">
+                    <li>Lentils (165 cal)</li>
+                    <li>Brown Rice (155 cal)</li>
+                    <li>Curry spices & veggies</li>
+                </ul>
+                <button class="btn-add" onclick="addRecipe('Lentil Curry (Vegan)', 320)">Add to My Log</button>
+            </div>
+        </div>
+
+        <div class="section recipe-section" style="background-color:#d1ecf1; border-left-color:#17a2b8;">
+            <h2 style="color:#0c5460;">💪 Weight Gain Meals (High Protein)</h2>
+
+            <div class="recipe-item animal-product has-dairy has-gluten high-carb" style="background:white; padding:15px; border-radius:8px; margin:10px 0; border:2px solid #ddd;">
+                <h3 style="color:#17a2b8; font-size:16px; margin-bottom:8px;">Mass Gainer Breakfast</h3>
+                <div style="color:#17a2b8; font-weight:bold; margin:5px 0;">750 calories</div>
+                <ul style="line-height:1.8; font-size:13px; margin:10px 0 10px 20px;">
+                    <li>3x Scrambled Eggs (306 cal)</li>
+                    <li>2x Wheat Toast (138 cal)</li>
+                    <li>1x Mass Gainer Shake (300 cal)</li>
+                </ul>
+                <button class="btn-add" onclick="addRecipe('Mass Gainer Breakfast', 750)">Add to My Log</button>
+            </div>
+
+            <div class="recipe-item animal-product meat-product high-carb" style="background:white; padding:15px; border-radius:8px; margin:10px 0; border:2px solid #ddd;">
+                <h3 style="color:#17a2b8; font-size:16px; margin-bottom:8px;">Steak & Potatoes</h3>
+                <div style="color:#17a2b8; font-weight:bold; margin:5px 0;">810 calories</div>
+                <ul style="line-height:1.8; font-size:13px; margin:10px 0 10px 20px;">
+                    <li>200g Beef Steak (542 cal)</li>
+                    <li>2x Baked Potatoes (322 cal)</li>
+                </ul>
+                <button class="btn-add" onclick="addRecipe('Steak & Potatoes', 810)">Add to My Log</button>
+            </div>
+
+            <div class="recipe-item animal-product meat-product high-carb has-gluten" style="background:white; padding:15px; border-radius:8px; margin:10px 0; border:2px solid #ddd;">
+                <h3 style="color:#17a2b8; font-size:16px; margin-bottom:8px;">Steers King Steer Meal</h3>
+                <div style="color:#17a2b8; font-weight:bold; margin:5px 0;">1030 calories</div>
+                <ul style="line-height:1.8; font-size:13px; margin:10px 0 10px 20px;">
+                    <li>King Steer Burger (650 cal)</li>
+                    <li>Chips (380 cal)</li>
+                </ul>
+                <button class="btn-add" onclick="addRecipe('Steers King Steer Meal', 1030)">Add to My Log</button>
+            </div>
+
+            <div class="recipe-item animal-product meat-product high-carb has-gluten has-dairy" style="background:white; padding:15px; border-radius:8px; margin:10px 0; border:2px solid #ddd;">
+                <h3 style="color:#17a2b8; font-size:16px; margin-bottom:8px;">Chicken Pasta Power Bowl</h3>
+                <div style="color:#17a2b8; font-weight:bold; margin:5px 0;">700 calories</div>
+                <ul style="line-height:1.8; font-size:13px; margin:10px 0 10px 20px;">
+                    <li>150g Chicken Breast (248 cal)</li>
+                    <li>1.5 cups Pasta (331 cal)</li>
+                    <li>Cheese & sauce (121 cal)</li>
+                </ul>
+                <button class="btn-add" onclick="addRecipe('Chicken Pasta Bowl', 700)">Add to My Log</button>
+            </div>
+
+            <div class="recipe-item vegan-friendly high-carb" style="background:white; padding:15px; border-radius:8px; margin:10px 0; border:2px solid #ddd;">
+                <h3 style="color:#17a2b8; font-size:16px; margin-bottom:8px;">Peanut Butter Power Bowl (Vegan)</h3>
+                <div style="color:#17a2b8; font-weight:bold; margin:5px 0;">680 calories</div>
+                <ul style="line-height:1.8; font-size:13px; margin:10px 0 10px 20px;">
+                    <li>Oatmeal (150 cal)</li>
+                    <li>2 tbsp Peanut Butter (190 cal)</li>
+                    <li>Banana (105 cal)</li>
+                    <li>Plant Protein Shake (235 cal)</li>
+                </ul>
+                <button class="btn-add" onclick="addRecipe('Peanut Butter Power Bowl (Vegan)', 680)">Add to My Log</button>
+            </div>
+
+            <div class="recipe-item vegan-friendly high-carb" style="background:white; padding:15px; border-radius:8px; margin:10px 0; border:2px solid #ddd;">
+                <h3 style="color:#17a2b8; font-size:16px; margin-bottom:8px;">Tofu Stir Fry (Vegan)</h3>
+                <div style="color:#17a2b8; font-weight:bold; margin:5px 0;">520 calories</div>
+                <ul style="line-height:1.8; font-size:13px; margin:10px 0 10px 20px;">
+                    <li>Tofu (286 cal)</li>
+                    <li>Brown Rice (218 cal)</li>
+                    <li>Mixed Veggies (16 cal)</li>
+                </ul>
+                <button class="btn-add" onclick="addRecipe('Tofu Stir Fry (Vegan)', 520)">Add to My Log</button>
+            </div>
+        </div>
+
+        <div class="section recipe-section" style="background-color:#e8f5e9; border-left-color:#4caf50;">
+            <h2 style="color:#2e7d32;">🥑 Keto & Low-Carb Meals</h2>
+
+            <div class="recipe-item animal-product meat-product" style="background:white; padding:15px; border-radius:8px; margin:10px 0; border:2px solid #ddd;">
+                <h3 style="color:#4caf50; font-size:16px; margin-bottom:8px;">Keto Chicken Salad</h3>
+                <div style="color:#4caf50; font-weight:bold; margin:5px 0;">380 calories</div>
+                <ul style="line-height:1.8; font-size:13px; margin:10px 0 10px 20px;">
+                    <li>Grilled Chicken (165 cal)</li>
+                    <li>Avocado (120 cal)</li>
+                    <li>Mixed Greens & Olive Oil (95 cal)</li>
+                </ul>
+                <button class="btn-add" onclick="addRecipe('Keto Chicken Salad', 380)">Add to My Log</button>
+            </div>
+
+            <div class="recipe-item animal-product meat-product has-dairy" style="background:white; padding:15px; border-radius:8px; margin:10px 0; border:2px solid #ddd;">
+                <h3 style="color:#4caf50; font-size:16px; margin-bottom:8px;">Beef & Cheese Plate</h3>
+                <div style="color:#4caf50; font-weight:bold; margin:5px 0;">520 calories</div>
+                <ul style="line-height:1.8; font-size:13px; margin:10px 0 10px 20px;">
+                    <li>Beef Steak 100g (271 cal)</li>
+                    <li>Cheddar Cheese (113 cal)</li>
+                    <li>Broccoli (55 cal)</li>
+                    <li>Butter (81 cal)</li>
+                </ul>
+                <button class="btn-add" onclick="addRecipe('Beef & Cheese Plate', 520)">Add to My Log</button>
+            </div>
+
+            <div class="recipe-item animal-product has-dairy" style="background:white; padding:15px; border-radius:8px; margin:10px 0; border:2px solid #ddd;">
+                <h3 style="color:#4caf50; font-size:16px; margin-bottom:8px;">Keto Egg Breakfast</h3>
+                <div style="color:#4caf50; font-weight:bold; margin:5px 0;">410 calories</div>
+                <ul style="line-height:1.8; font-size:13px; margin:10px 0 10px 20px;">
+                    <li>3x Scrambled Eggs (270 cal)</li>
+                    <li>Avocado 1/2 (120 cal)</li>
+                    <li>Spinach (20 cal)</li>
+                </ul>
+                <button class="btn-add" onclick="addRecipe('Keto Egg Breakfast', 410)">Add to My Log</button>
+            </div>
+
+            <div class="recipe-item vegan-friendly" style="background:white; padding:15px; border-radius:8px; margin:10px 0; border:2px solid #ddd;">
+                <h3 style="color:#4caf50; font-size:16px; margin-bottom:8px;">Keto Avocado Bowl (Vegan)</h3>
+                <div style="color:#4caf50; font-weight:bold; margin:5px 0;">360 calories</div>
+                <ul style="line-height:1.8; font-size:13px; margin:10px 0 10px 20px;">
+                    <li>Avocado (240 cal)</li>
+                    <li>Mixed Nuts (100 cal)</li>
+                    <li>Leafy Greens (20 cal)</li>
+                </ul>
+                <button class="btn-add" onclick="addRecipe('Keto Avocado Bowl (Vegan)', 360)">Add to My Log</button>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🥗 Meal Prep Tips</h2>
+            <div style="background:white; padding:15px; border-radius:8px; line-height:1.8; font-size:14px;">
+                <p><strong>For Weight Loss:</strong></p>
+                <ul style="margin:10px 0 10px 20px;">
+                    <li>Prep grilled chicken breasts (165 cal each)</li>
+                    <li>Boil eggs in bulk (78 cal each)</li>
+                    <li>Cut veggies for easy snacking (5-55 cal)</li>
+                    <li>Keep protein shakes ready (120 cal)</li>
+                    <li>Meal prep wraps for quick lunches</li>
+                </ul>
+                <br>
+                <p><strong>For Weight Gain:</strong></p>
+                <ul style="margin:10px 0 10px 20px;">
+                    <li>Cook rice & pasta in bulk (200+ cal/cup)</li>
+                    <li>Prep high-calorie wraps & sandwiches</li>
+                    <li>Make protein shakes with milk (200+ cal)</li>
+                    <li>Add nuts to every meal (200 cal/oz)</li>
+                    <li>Always have mass gainer ready</li>
+                </ul>
+            </div>
+        </div>
     </div>
 </div>
 </div>
@@ -814,19 +1113,17 @@
     // FIREBASE CONFIGURATION
     // ============================================
     // PASTE YOUR FIREBASE CONFIG HERE (from Firebase Console Step 5)
-   const firebaseConfig = {
-  apiKey: "AIzaSyCRcR_avSGTnn4G69FUk8wcshrVHZNrj5o",
-  authDomain: "calorie-app-67270.firebaseapp.com",
-  projectId: "calorie-app-67270",
-  storageBucket: "calorie-app-67270.firebasestorage.app",
-  messagingSenderId: "768480441035",
-  appId: "1:768480441035:web:ed34093e220ace6c13614e"
-};
+    const firebaseConfig = {
+        apiKey: "AIzaSyCRcR_avSGTnn4G69FUk8wcshrVHZNrj5o",
+        authDomain: "calorie-app-67270.firebaseapp.com",
+        projectId: "calorie-app-67270",
+        storageBucket: "calorie-app-67270.firebasestorage.app",
+        messagingSenderId: "768480441035",
+        appId: "1:768480441035:web:ed34093e220ace6c13614e"
+    };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-
-
+    // Initialize Firebase
+    let app, auth, db, currentUser;
 
     try {
         app = firebase.initializeApp(firebaseConfig);
@@ -860,19 +1157,53 @@ const app = initializeApp(firebaseConfig);
     function switchAuthTab(tab) {
         const loginForm = document.getElementById('loginForm');
         const registerForm = document.getElementById('registerForm');
+        const resetForm = document.getElementById('resetForm');
         const authTabs = document.querySelectorAll('.auth-tab');
 
         if (tab === 'login') {
             loginForm.style.display = 'block';
             registerForm.style.display = 'none';
+            resetForm.style.display = 'none';
             authTabs[0].classList.add('active');
             authTabs[1].classList.remove('active');
         } else {
             loginForm.style.display = 'none';
             registerForm.style.display = 'block';
+            resetForm.style.display = 'none';
             authTabs[0].classList.remove('active');
             authTabs[1].classList.add('active');
         }
+    }
+
+    function showPasswordReset() {
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
+        const resetForm = document.getElementById('resetForm');
+        const authTabs = document.querySelectorAll('.auth-tab');
+
+        loginForm.style.display = 'none';
+        registerForm.style.display = 'none';
+        resetForm.style.display = 'block';
+        authTabs.forEach(tab => tab.classList.remove('active'));
+    }
+
+    function resetPassword() {
+        const email = document.getElementById('resetEmail').value.trim();
+
+        if (!email) {
+            alert('Please enter your email address');
+            return;
+        }
+
+        auth.sendPasswordResetEmail(email)
+            .then(() => {
+                alert('Password reset email sent! Check your inbox.');
+                document.getElementById('resetEmail').value = '';
+                switchAuthTab('login');
+            })
+            .catch((error) => {
+                alert('Error: ' + error.message);
+            });
     }
 
     function register() {
@@ -926,6 +1257,45 @@ const app = initializeApp(firebaseConfig);
     function logout() {
         if (confirm('Are you sure you want to logout?')) {
             auth.signOut();
+        }
+    }
+
+    function changePassword() {
+        const newPassword = document.getElementById('newPassword').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+
+        if (!newPassword || !confirmPassword) {
+            alert('Please fill in both password fields');
+            return;
+        }
+
+        if (newPassword.length < 6) {
+            alert('Password must be at least 6 characters');
+            return;
+        }
+
+        if (newPassword !== confirmPassword) {
+            alert('Passwords do not match');
+            return;
+        }
+
+        const user = auth.currentUser;
+        if (user) {
+            user.updatePassword(newPassword)
+                .then(() => {
+                    alert('Password updated successfully!');
+                    document.getElementById('newPassword').value = '';
+                    document.getElementById('confirmPassword').value = '';
+                })
+                .catch((error) => {
+                    if (error.code === 'auth/requires-recent-login') {
+                        alert('For security, please log out and log back in before changing your password.');
+                    } else {
+                        alert('Error updating password: ' + error.message);
+                    }
+                });
+        } else {
+            alert('No user logged in');
         }
     }
 
@@ -983,6 +1353,7 @@ const app = initializeApp(firebaseConfig);
 
                     document.getElementById('dietMode').value = currentDietMode;
                     applyDietMode();
+                    filterRecipes();
                     updateFavoritesList();
                     updateDisplay();
                     updateWeightDisplay();
@@ -1047,7 +1418,103 @@ const app = initializeApp(firebaseConfig);
     function changeDietMode() {
         currentDietMode = document.getElementById('dietMode').value;
         applyDietMode();
+        filterRecipes();
         saveDataToFirebase();
+    }
+
+    function filterRecipes() {
+        const recipes = document.querySelectorAll('.recipe-item');
+        const sections = document.querySelectorAll('.recipe-section');
+        const filterInfo = document.getElementById('recipeFilterInfo');
+
+        let filterText = '';
+        let visibleCount = 0;
+
+        // Reset all recipes
+        recipes.forEach(recipe => {
+            recipe.classList.remove('recipe-hidden');
+        });
+
+        // Apply dietary filters
+        if (currentDietMode === 'none') {
+            filterText = '';
+        } else if (currentDietMode === 'halal') {
+            filterText = 'Showing Halal recipes only';
+            recipes.forEach(recipe => {
+                if (recipe.classList.contains('non-halal')) {
+                    recipe.classList.add('recipe-hidden');
+                }
+            });
+        } else if (currentDietMode === 'diabetic') {
+            filterText = 'Showing Diabetic-Friendly recipes only';
+            recipes.forEach(recipe => {
+                if (recipe.classList.contains('high-sugar')) {
+                    recipe.classList.add('recipe-hidden');
+                }
+            });
+        } else if (currentDietMode === 'vegan') {
+            filterText = 'Showing Vegan recipes only';
+            recipes.forEach(recipe => {
+                if (!recipe.classList.contains('vegan-friendly')) {
+                    recipe.classList.add('recipe-hidden');
+                }
+            });
+        } else if (currentDietMode === 'vegetarian') {
+            filterText = 'Showing Vegetarian recipes only';
+            recipes.forEach(recipe => {
+                if (recipe.classList.contains('meat-product')) {
+                    recipe.classList.add('recipe-hidden');
+                }
+            });
+        } else if (currentDietMode === 'keto') {
+            filterText = 'Showing Keto/Low-Carb recipes only';
+            recipes.forEach(recipe => {
+                if (recipe.classList.contains('high-carb')) {
+                    recipe.classList.add('recipe-hidden');
+                }
+            });
+        } else if (currentDietMode === 'glutenFree') {
+            filterText = 'Showing Gluten-Free recipes only';
+            recipes.forEach(recipe => {
+                if (recipe.classList.contains('has-gluten')) {
+                    recipe.classList.add('recipe-hidden');
+                }
+            });
+        } else if (currentDietMode === 'lactoseFree') {
+            filterText = 'Showing Lactose-Free recipes only';
+            recipes.forEach(recipe => {
+                if (recipe.classList.contains('has-dairy')) {
+                    recipe.classList.add('recipe-hidden');
+                }
+            });
+        }
+
+        // Count visible recipes and hide empty sections
+        sections.forEach(section => {
+            const recipesInSection = section.querySelectorAll('.recipe-item');
+            let hasVisible = false;
+
+            recipesInSection.forEach(recipe => {
+                if (!recipe.classList.contains('recipe-hidden')) {
+                    hasVisible = true;
+                    visibleCount++;
+                }
+            });
+
+            if (!hasVisible) {
+                section.classList.add('recipe-section-hidden');
+            } else {
+                section.classList.remove('recipe-section-hidden');
+            }
+        });
+
+        // Update filter info
+        if (filterText) {
+            filterInfo.textContent = `(${filterText} - ${visibleCount} recipes available)`;
+            filterInfo.style.color = '#667eea';
+        } else {
+            filterInfo.textContent = '';
+        }
     }
 
     function applyDietMode() {
@@ -1111,18 +1578,37 @@ const app = initializeApp(firebaseConfig);
         const searchTerm = document.getElementById('searchBox').value.toLowerCase();
         const select = document.getElementById('foodSel');
         const options = select.getElementsByTagName('option');
+        const suggestionsBox = document.getElementById('suggestionsBox');
 
-        for (let i = 0; i < options.length; i++) {
-            const option = options[i];
-            const text = option.text.toLowerCase();
+        // First reapply diet mode to reset visibility
+        applyDietMode();
 
-            if (text.includes(searchTerm) || searchTerm === '') {
-                option.style.display = '';
-            } else {
-                option.style.display = 'none';
+        // Collect matching items for suggestions
+        const matches = [];
+
+        // Then apply search filter on top
+        if (searchTerm !== '') {
+            for (let i = 0; i < options.length; i++) {
+                const option = options[i];
+                const text = option.text.toLowerCase();
+
+                // Only hide if doesn't match search AND not already disabled by diet mode
+                if (!text.includes(searchTerm) && !option.disabled) {
+                    option.style.display = 'none';
+                } else if (text.includes(searchTerm) && !option.disabled && option.value !== '') {
+                    option.style.display = '';
+                    matches.push({
+                        text: option.text,
+                        value: option.value,
+                        index: i
+                    });
+                }
             }
+        } else {
+            suggestionsBox.style.display = 'none';
         }
 
+        // Update optgroups visibility
         const optgroups = select.getElementsByTagName('optgroup');
         for (let i = 0; i < optgroups.length; i++) {
             const group = optgroups[i];
@@ -1138,6 +1624,33 @@ const app = initializeApp(firebaseConfig);
 
             group.style.display = hasVisible ? '' : 'none';
         }
+
+        // Show suggestions box
+        if (searchTerm !== '' && matches.length > 0) {
+            let html = '';
+            matches.slice(0, 8).forEach(match => {
+                html += `<div class="suggestion-item" onclick="selectSuggestion(${match.index})">
+                    ${match.text}
+                    <span class="suggestion-cal">${match.value} cal</span>
+                </div>`;
+            });
+            suggestionsBox.innerHTML = html;
+            suggestionsBox.style.display = 'block';
+        } else if (searchTerm !== '' && matches.length === 0) {
+            suggestionsBox.innerHTML = '<div class="suggestion-item" style="color:#999; cursor:default;">No results found</div>';
+            suggestionsBox.style.display = 'block';
+        } else {
+            suggestionsBox.style.display = 'none';
+        }
+    }
+
+    function selectSuggestion(optionIndex) {
+        const select = document.getElementById('foodSel');
+        select.selectedIndex = optionIndex;
+        document.getElementById('searchBox').value = '';
+        document.getElementById('suggestionsBox').style.display = 'none';
+        filterFoods();
+        previewCal();
     }
 
     function previewCal() {
@@ -1534,6 +2047,8 @@ const app = initializeApp(firebaseConfig);
             document.getElementById('weightDate').value = formatDate(new Date());
         } else if (num === 3) {
             updateHistoryStats();
+        } else if (num === 5) {
+            filterRecipes();
         }
     }
 
@@ -1718,8 +2233,43 @@ const app = initializeApp(firebaseConfig);
             updateHistoryStats();
         }
     }
+
+    function addRecipe(recipeName, totalCalories) {
+        const now = new Date();
+        const hour = now.getHours();
+        const mealTime = now.toTimeString().slice(0, 5);
+        let mealType = hour >= 5 && hour < 11 ? 'breakfast' :
+                       hour >= 11 && hour < 15 ? 'lunch' :
+                       hour >= 15 && hour < 21 ? 'dinner' : 'snack';
+
+        const dateKey = getDateKey();
+        if (!allDayData[dateKey]) {
+            allDayData[dateKey] = { foods: [], weight: null };
+        }
+
+        allDayData[dateKey].foods.push({
+            name: recipeName,
+            cal: totalCalories,
+            meal: mealType,
+            time: mealTime
+        });
+
+        updateDisplay();
+        saveDataToFirebase();
+
+        showTab(1);
+        alert(`Added "${recipeName}" to your food log!`);
+    }
+
+    // Hide suggestions box when clicking outside
+    document.addEventListener('click', function(event) {
+        const suggestionsBox = document.getElementById('suggestionsBox');
+        const searchBox = document.getElementById('searchBox');
+        if (suggestionsBox && searchBox && event.target !== searchBox && event.target !== suggestionsBox && !suggestionsBox.contains(event.target)) {
+            suggestionsBox.style.display = 'none';
+        }
+    });
 </script>
 
 </body>
 </html>
-
