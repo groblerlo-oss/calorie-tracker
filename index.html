@@ -6,6 +6,12 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="CalTracker">
+
+    <!-- Cache Control: Users always get latest version -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
     <title>Calorie Tracker Pro</title>
 
     <!-- Firebase SDK -->
@@ -495,7 +501,7 @@
 <!-- MAIN APP SCREEN -->
 <div id="appScreen" style="display:none;">
 <div class="container">
-    <h1>Calorie Tracker Pro</h1>
+    <h1>Calorie Tracker Pro <span style="font-size:12px; color:#999; font-weight:normal;" id="appVersion"></span></h1>
 
     <div class="user-info">
         Logged in as: <span id="userEmail"></span>
@@ -1110,9 +1116,16 @@
 
 <script>
     // ============================================
+    // APP VERSION - Update this when you make changes!
+    // ============================================
+    const APP_VERSION = "2.0.0"; // Bump this number when updating the app
+    console.log(`🚀 Calorie Tracker Pro v${APP_VERSION}`);
+
+    // ============================================
     // FIREBASE CONFIGURATION
     // ============================================
-    // PASTE YOUR FIREBASE CONFIG HERE (from Firebase Console Step 5)
+    // ⚠️ ONLY EDIT THIS IF YOU CREATE A NEW FIREBASE PROJECT
+    // Otherwise, leave it as-is! This config is meant to be public.
     const firebaseConfig = {
         apiKey: "AIzaSyCRcR_avSGTnn4G69FUk8wcshrVHZNrj5o",
         authDomain: "calorie-app-67270.firebaseapp.com",
@@ -1140,6 +1153,38 @@
             </div>
         `;
     }
+
+    // ============================================
+    // VERSION CHECK & UPDATE NOTIFICATION
+    // ============================================
+    function checkForUpdates() {
+        const lastVersion = localStorage.getItem('appVersion');
+        const currentVersion = APP_VERSION;
+
+        // Display version in UI
+        const versionEl = document.getElementById('appVersion');
+        if (versionEl) {
+            versionEl.textContent = `v${currentVersion}`;
+        }
+
+        // Check if app was updated
+        if (lastVersion && lastVersion !== currentVersion) {
+            console.log(`🎉 Updated from v${lastVersion} to v${currentVersion}`);
+
+            // Show update notification
+            setTimeout(() => {
+                if (confirm(`✨ App updated to v${currentVersion}!\n\nNew features and improvements available.\n\nWould you like to see what's new?`)) {
+                    alert(`Version ${currentVersion} Updates:\n\n✅ Recipe Book now filters by dietary mode\n✅ Smart food search with suggestions\n✅ Password reset & change password\n✅ Improved health tips\n✅ Better recipe categorization`);
+                }
+            }, 2000);
+        }
+
+        // Save current version
+        localStorage.setItem('appVersion', currentVersion);
+    }
+
+    // Run version check on load
+    checkForUpdates();
 
     // ============================================
     // APP STATE

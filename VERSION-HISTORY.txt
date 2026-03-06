@@ -1,0 +1,96 @@
+================================================================
+  CALORIE TRACKER PRO - VERSION HISTORY
+================================================================
+
+================================================================
+VERSION 2.0.0 (Current) - 2026-03-06
+================================================================
+
+NEW FEATURES:
+  ✓ Recipe Book with dietary filtering
+    - Recipes automatically filter based on selected diet mode
+    - Added 14 recipes covering all diet types
+    - Vegan, Vegetarian, Keto, Halal, Gluten-Free, Lactose-Free support
+    - Real-time recipe count display
+
+  ✓ Smart Food Search with Suggestions
+    - Live suggestion dropdown as you type
+    - Click suggestions to instantly select foods
+    - Shows calories in suggestions
+    - Auto-hides when clicking outside
+
+  ✓ Password Management
+    - Forgot Password feature on login screen
+    - Change Password in Profile tab
+    - Email-based password reset via Firebase
+
+  ✓ Version Control System
+    - Automatic update notifications
+    - Version display in header
+    - Cache control for instant updates
+    - Update changelog popup
+
+IMPROVEMENTS:
+  ✓ Better recipe organization by diet type
+  ✓ Enhanced UI with filter indicators
+  ✓ Improved health coach tips
+  ✓ Better code organization with comments
+  ✓ Deployment guide for easy updates
+
+TECHNICAL:
+  ✓ Cache-Control headers for fresh content
+  ✓ localStorage-based version tracking
+  ✓ Recipe filtering system with CSS classes
+  ✓ Firebase config documentation
+
+================================================================
+VERSION 1.0.0 - Original Release
+================================================================
+
+CORE FEATURES:
+  ✓ Food tracking with 100+ food items
+  ✓ Calorie calculator
+  ✓ Weight tracking
+  ✓ Daily/weekly statistics
+  ✓ BMR and calorie goal calculator
+  ✓ History view
+  ✓ Firebase authentication
+  ✓ Cloud data sync
+  ✓ Dietary mode filters
+  ✓ Favorites system
+  ✓ Health coach tips
+  ✓ Mobile-responsive design
+
+================================================================
+  FUTURE ROADMAP
+================================================================
+
+PLANNED FEATURES:
+  - Custom food entry
+  - Meal photos
+  - Barcode scanner
+  - Exercise tracking
+  - Water intake tracker
+  - Macro nutrient breakdown
+  - Export data to CSV
+  - Weekly meal planner
+  - Shopping list generator
+  - Social sharing
+  - Dark mode
+
+================================================================
+  HOW TO USE THIS FILE
+================================================================
+
+When you update the app:
+  1. Add a new version section above
+  2. List what changed
+  3. Update the version number in index.html (APP_VERSION)
+  4. Save and deploy
+
+Example version numbering:
+  2.0.0 → 2.0.1 = Bug fixes, minor changes
+  2.0.0 → 2.1.0 = New features
+  2.0.0 → 3.0.0 = Major overhaul
+
+================================================================
